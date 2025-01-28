@@ -1,4 +1,4 @@
-package com.kdk.app.common.vo;
+package com.kdk.app.login.vo;
 
 import lombok.Getter;
 import lombok.Setter;

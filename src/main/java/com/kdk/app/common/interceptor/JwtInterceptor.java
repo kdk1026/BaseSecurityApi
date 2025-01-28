@@ -8,7 +8,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import com.kdk.app.common.CommonConstants;
 import com.kdk.app.common.jwt.JwtTokenProvider;
 import com.kdk.app.common.vo.ResponseCodeEnum;
-import com.kdk.app.common.vo.UserVo;
+import com.kdk.app.login.vo.UserVo;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

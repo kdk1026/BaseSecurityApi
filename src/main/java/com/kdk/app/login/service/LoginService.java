@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.kdk.app.common.vo.UserVo;
+import com.kdk.app.login.vo.UserVo;
 
 /**
  * <pre>

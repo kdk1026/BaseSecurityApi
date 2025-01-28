@@ -10,10 +10,10 @@ import com.kdk.app.common.jwt.JwtTokenProvider;
 import com.kdk.app.common.util.date.Jsr310DateUtil;
 import com.kdk.app.common.util.spring.SpringBootPropertyUtil;
 import com.kdk.app.common.vo.ResponseCodeEnum;
-import com.kdk.app.common.vo.UserVo;
 import com.kdk.app.login.service.RefreshTokenService;
 import com.kdk.app.login.vo.LoginResVo;
 import com.kdk.app.login.vo.RefreshTokenParamVo;
+import com.kdk.app.login.vo.UserVo;
 
 import lombok.extern.slf4j.Slf4j;
 

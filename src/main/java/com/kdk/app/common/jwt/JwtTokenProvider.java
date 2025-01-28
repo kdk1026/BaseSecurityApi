@@ -15,7 +15,7 @@ import com.kdk.app.common.CommonConstants;
 import com.kdk.app.common.util.crypto.AesCryptoUtil;
 import com.kdk.app.common.util.json.GsonUtil;
 import com.kdk.app.common.util.spring.SpringBootPropertyUtil;
-import com.kdk.app.common.vo.UserVo;
+import com.kdk.app.login.vo.UserVo;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

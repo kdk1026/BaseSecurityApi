@@ -12,8 +12,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.kdk.app.common.vo.UserVo;
 import com.kdk.app.login.service.LoginService;
+import com.kdk.app.login.vo.UserVo;
 
 /**
  * <pre>

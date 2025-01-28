@@ -16,7 +16,7 @@ import com.kdk.app.common.security.service.UserDetailsServiceImpl;
 import com.kdk.app.common.util.json.JacksonUtil;
 import com.kdk.app.common.vo.CommonResVo;
 import com.kdk.app.common.vo.ResponseCodeEnum;
-import com.kdk.app.common.vo.UserVo;
+import com.kdk.app.login.vo.UserVo;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

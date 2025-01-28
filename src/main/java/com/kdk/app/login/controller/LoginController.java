@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.kdk.app.common.jwt.JwtTokenProvider;
 import com.kdk.app.common.util.spring.SpringBootPropertyUtil;
 import com.kdk.app.common.vo.ResponseCodeEnum;
-import com.kdk.app.common.vo.UserVo;
 import com.kdk.app.login.service.LoginService;
 import com.kdk.app.login.vo.LoginParamVo;
 import com.kdk.app.login.vo.LoginResVo;
+import com.kdk.app.login.vo.UserVo;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
