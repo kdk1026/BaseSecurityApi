@@ -8,8 +8,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -40,7 +42,7 @@ public class SecurityConfig {
 	@Bean
     WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-        		.requestMatchers("/favicon.ico", "/swagger-ui/**", "/v3/**", "/login/**");
+        		.requestMatchers("/favicon.ico", "/", "/swagger-ui/**", "/v3/**", "/login/**");
 	}
 
 	@Bean
@@ -50,7 +52,6 @@ public class SecurityConfig {
 		http
 			.authorizeHttpRequests((authorizeHttpRequests) ->
 				authorizeHttpRequests
-					.requestMatchers("/").permitAll()
 					.requestMatchers("/admin/**").hasRole("ADMIN")
 					.requestMatchers("/manager/**").hasAnyRole("ADMIN", "MANAGER")
 					.requestMatchers("/upload/**").permitAll()
@@ -65,6 +66,13 @@ public class SecurityConfig {
 			.csrf((csrf) -> csrf.disable())
 			.cors(this.corsCustomizer())
 			.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+			.headers((headers) ->
+				headers
+					.httpStrictTransportSecurity(this.hstsCustomizer())
+					.frameOptions(this.frameOptionsCustomizer())
+					.xssProtection(this.xssCustomizer())
+
+			)
 			;
 
 		return http.build();
@@ -92,6 +100,20 @@ public class SecurityConfig {
 
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
+	}
+
+	private Customizer<HeadersConfigurer<HttpSecurity>.HstsConfig> hstsCustomizer() {
+		return hsts -> hsts
+				.includeSubDomains(true)
+				.maxAgeInSeconds(31536000); // 1년
+	}
+
+	private Customizer<HeadersConfigurer<HttpSecurity>.FrameOptionsConfig> frameOptionsCustomizer() {
+		return frameOptions -> frameOptions.deny();
+	}
+
+	private Customizer<HeadersConfigurer<HttpSecurity>.XXssConfig> xssCustomizer() {
+		return xss -> xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED);
 	}
 
 }
