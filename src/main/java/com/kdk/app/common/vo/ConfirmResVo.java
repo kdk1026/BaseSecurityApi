@@ -1,5 +1,7 @@
 package com.kdk.app.common.vo;
 
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,5 +25,8 @@ public class ConfirmResVo extends CommonResVo {
 
 	@Schema(description = "아이디", requiredMode = Schema.RequiredMode.REQUIRED)
 	private String username;
+
+	@Schema(description = "권한", requiredMode = Schema.RequiredMode.REQUIRED)
+	private List<String> roles;
 
 }
