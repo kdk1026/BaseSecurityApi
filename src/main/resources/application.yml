@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: BaseSecurityApi
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML5
+    cache: false
+  profiles:
+    active:
+    - local
+  mvc:
+    pathmatch:
+      matching-strategy: ant-path-matcher
+    dispatch-options-request: true
+    static-path-pattern: /**
+    
+tomcat:
+  ajp:
+    protocol: AJP/1.3
+    enabled: true
+    
+server:
+  error:
+    whitelabel:
+      enabled: false
+      
+swagger:
+   title: Base Data API Docs
+   description: Base Data API
+   version: v.0.1
+   allow:
+      ip: 127.0.0.1,0:0:0:0:0:0:0:1,14.63.82.212
+      band: 192.168.0
