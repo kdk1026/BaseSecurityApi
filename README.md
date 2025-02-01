@@ -1,3 +1,1 @@
-# Spring Security + JWT 예제
-
-### Swagger
+# Spring Security + JWT + Swagger 예제
