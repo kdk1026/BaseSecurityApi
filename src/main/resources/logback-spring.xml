@@ -100,6 +100,9 @@ See here for more details: http://gordondickens.com/wordpress/2013/03/27/sawing-
 		<appender-ref ref="console"/>
 	</logger>
 
+    <!-- 시큐리티 로거 레벨 설정 -->
+	<logger name="org.springframework.security" level="${PACKAGE_LEVEL}" />
+
 	<!-- Package -->
 	<logger name="com.kdk" level="${PACKAGE_LEVEL}" additivity="false">
 		<appender-ref ref="console"/>
