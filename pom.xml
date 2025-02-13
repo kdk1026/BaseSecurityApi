@@ -155,6 +155,11 @@
 		    <artifactId>httpclient5</artifactId>
 		    <version>5.4</version><!--$NO-MVN-MAN-VER$-->
 		</dependency>
+		<dependency>
+		    <groupId>org.apache.httpcomponents.core5</groupId>
+		    <artifactId>httpcore5</artifactId>
+		    <version>5.3</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
 	</dependencies>
 
 	<build>

@@ -68,11 +68,11 @@ public class RestTemplateUtil {
 		private static class HttpClientConfig {
 			private static final int TIMEOUT = 5000;
 
-		private static final ConnectionConfig config =
-			ConnectionConfig.custom()
-			.setConnectTimeout(TIMEOUT, TimeUnit.MILLISECONDS)
-			.setSocketTimeout(TIMEOUT, TimeUnit.MILLISECONDS)
-			.build();
+			private static final ConnectionConfig config =
+				ConnectionConfig.custom()
+					.setConnectTimeout(TIMEOUT, TimeUnit.MILLISECONDS)
+					.setSocketTimeout(TIMEOUT, TimeUnit.MILLISECONDS)
+					.build();
 		}
 
 		private static HttpClientConnectionManager createHttpClientConnectionManager(boolean isSSL) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
