@@ -39,7 +39,11 @@ public class HTMLCharacterEscapes extends CharacterEscapes {
 	 */
 	@Override
 	public int[] getEscapeCodesForAscii() {
-		return asciiEscapes;
+		int[] safeAsciiEscapes = null;
+		if ( this.asciiEscapes != null ) {
+			safeAsciiEscapes = this.asciiEscapes;
+		}
+		return safeAsciiEscapes;
 	}
 
 	/* (non-Javadoc)
