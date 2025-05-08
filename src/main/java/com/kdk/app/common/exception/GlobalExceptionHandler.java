@@ -132,6 +132,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
     */
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> handleRuntimeException(RuntimeException e) {
+    	log.error("", e);
+
+    	String sResponseMessage = "Oops! Something went wrong on our end. We're working on it.";
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(sResponseMessage);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(Exception e) {
     	log.error("", e);
