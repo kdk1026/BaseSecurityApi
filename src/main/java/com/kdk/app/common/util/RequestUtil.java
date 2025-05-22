@@ -1,5 +1,11 @@
 package com.kdk.app.common.util;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -7,11 +13,11 @@ import jakarta.servlet.http.HttpServletRequest;
  * -----------------------------------
  * 개정이력
  * -----------------------------------
- * 2024. 6. 8. 김대광	최초작성
+ * 2024. 6. 7. kdk	최초작성
  * </pre>
  *
  *
- * @author 김대광
+ * @author kdk
  */
 public class RequestUtil {
 
@@ -19,47 +25,38 @@ public class RequestUtil {
 		super();
 	}
 
+	private static final Logger logger = LoggerFactory.getLogger(RequestUtil.class);
+
 	/**
 	 * IP 주소 가져오기
 	 * @param request
 	 * @return
 	 */
 	public static String getRequestIpAddress(HttpServletRequest request) {
-		String sIpAddr = request.getHeader("X-Forwarded-For");
-
-		if (sIpAddr == null || sIpAddr.length() == 0 || "unknown".equalsIgnoreCase(sIpAddr)) {
-			sIpAddr = request.getHeader("Proxy-Client-IP");
+		if ( request == null ) {
+			throw new IllegalArgumentException("request is null");
 		}
 
-		if (sIpAddr == null || sIpAddr.length() == 0 || "unknown".equalsIgnoreCase(sIpAddr)) {
-			sIpAddr = request.getHeader("WL-Proxy-Client-IP");
-		}
+	    String[] sHeaders = {
+	    		"X-Forwarded-For",
+	    		"Proxy-Client-IP",
+	    		"WL-Proxy-Client-IP",
+	    		"HTTP_CLIENT_IP",
+	    		"HTTP_X_FORWARDED_FOR",
+	    		"X-Real-IP",
+	    		"X-RealIP",
+	    		"REMOTE_ADDR"
+	    };
 
-		if (sIpAddr == null || sIpAddr.length() == 0 || "unknown".equalsIgnoreCase(sIpAddr)) {
-			sIpAddr = request.getHeader("HTTP_CLIENT_IP");
-		}
+	    for ( String header : sHeaders ) {
+	    	String sIp = request.getHeader(header);
 
-		if (sIpAddr == null || sIpAddr.length() == 0 || "unknown".equalsIgnoreCase(sIpAddr)) {
-			sIpAddr = request.getHeader("HTTP_X_FORWARDED_FOR");
-		}
+	    	if ( sIp != null && !sIp.isEmpty() && !"unknown".equalsIgnoreCase(sIp) ) {
+	    		return sIp;
+	    	}
+	    }
 
-		if (sIpAddr == null || sIpAddr.length() == 0 || "unknown".equalsIgnoreCase(sIpAddr)) {
-			sIpAddr = request.getHeader("X-Real-IP");
-        }
-
-		if (sIpAddr == null || sIpAddr.length() == 0 || "unknown".equalsIgnoreCase(sIpAddr)) {
-			sIpAddr = request.getHeader("X-RealIP");
-		}
-
-		if (sIpAddr == null || sIpAddr.length() == 0 || "unknown".equalsIgnoreCase(sIpAddr)) {
-			sIpAddr = request.getHeader("REMOTE_ADDR");
-		}
-
-		if (sIpAddr == null || sIpAddr.length() == 0 || "unknown".equalsIgnoreCase(sIpAddr)) {
-			sIpAddr = request.getRemoteAddr();
-		}
-
-		return sIpAddr;
+	    return request.getRemoteAddr();
 	}
 
 	/**
@@ -68,11 +65,35 @@ public class RequestUtil {
 	 * @return
 	 */
 	public static String getRequestDomain(HttpServletRequest request) {
+		if ( request == null ) {
+			throw new IllegalArgumentException("request");
+		}
+
 		String sReqUrl = request.getRequestURL().toString();
 		String sServletPath = request.getServletPath();
-		String sSiteDomain = sReqUrl.replace(sServletPath, "");
+		return sReqUrl.replace(sServletPath, "");
+	}
 
-		return sSiteDomain;
+	/**
+	 * 기본 도메인 가져오기 (포트 미포함)
+	 * @param request
+	 * @return
+	 */
+	public static String getBaseDomain(HttpServletRequest request) {
+		if ( request == null ) {
+			throw new IllegalArgumentException("request");
+		}
+
+		String reqUrl = request.getRequestURL().toString();
+		URI uri;
+
+		try {
+			uri = new URI(reqUrl);
+			return uri.getScheme() + "://" + uri.getAuthority();
+		} catch (URISyntaxException e) {
+			logger.error("", e);
+			return null;
+		}
 	}
 
 }

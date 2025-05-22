@@ -34,18 +34,20 @@ public class AesCryptoUtil {
 
 	private final Logger logger = LoggerFactory.getLogger(AesCryptoUtil.class);
 
-	private static class LazyHolder {
-		private static final AesCryptoUtil INSTANCE = new AesCryptoUtil();
-	}
+	private static AesCryptoUtil instance;
 
-	public static AesCryptoUtil getInstance() {
-		return LazyHolder.INSTANCE;
-	}
+	public static synchronized AesCryptoUtil getInstance() {
+        if (instance == null) {
+			instance = new AesCryptoUtil();
+        }
+
+        return instance;
+    }
 
 	private final String CHARSET = StandardCharsets.UTF_8.toString();
 
-	public final String AES_CBC_PKCS5PADDING ="AES/CBC/PKCS5Padding";
-	public final String AES_ECB_PKCS5PADDING ="AES/ECB/PKCS5Padding";
+	public static final String AES_CBC_PKCS5PADDING ="AES/CBC/PKCS5Padding";
+	public static final String AES_ECB_PKCS5PADDING ="AES/ECB/PKCS5Padding";
 
 	public String encrypt(String key, String iv, String padding, String plainText) {
 		String sEncryptText = "";

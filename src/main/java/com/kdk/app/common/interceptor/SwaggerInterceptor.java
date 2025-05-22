@@ -51,7 +51,7 @@ public class SwaggerInterceptor implements HandlerInterceptor {
 			commonResVo.setCode(ResponseCodeEnum.ERROR.getCode());
 			commonResVo.setMessage("유효하지 않은 접근입니다.");
 
-			String sJson = GsonUtil.ToJson.converterObjToJsonStr(commonResVo);
+			String sJson = GsonUtil.ToJson.converterObjToJsonStr(commonResVo, false);
 
 			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 			response.setCharacterEncoding(StandardCharsets.UTF_8.toString());

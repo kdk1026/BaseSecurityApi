@@ -20,19 +20,21 @@ import org.slf4j.LoggerFactory;
  */
 public class FileMimeTypeUtil {
 
-	private static final Logger logger = LoggerFactory.getLogger(FileMimeTypeUtil.class);
-
 	private FileMimeTypeUtil() {
 		super();
 	}
 
-	public static FileMimeTypeUtil getInstance() {
-		return LazyHolder.INSTANCE;
-	}
+	private static final Logger logger = LoggerFactory.getLogger(FileMimeTypeUtil.class);
 
-	private static class LazyHolder {
-		private static final FileMimeTypeUtil INSTANCE = new FileMimeTypeUtil();
-	}
+	private static FileMimeTypeUtil instance;
+
+	public static synchronized FileMimeTypeUtil getInstance() {
+        if (instance == null) {
+			instance = new FileMimeTypeUtil();
+        }
+
+        return instance;
+    }
 
 	public String getFileMimeTypeTika(InputStream is) {
 		String mimeType = "";

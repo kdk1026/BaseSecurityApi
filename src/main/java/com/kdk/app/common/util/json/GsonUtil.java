@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,47 +19,61 @@ import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
 
 /**
- * <pre>
- * -----------------------------------
- * 개정이력
- * -----------------------------------
- * 2024. 6. 7. kdk	최초작성
- * </pre>
- *
- *
- * @author kdk
- */
+* <pre>
+* -----------------------------------
+* 개정이력
+* -----------------------------------
+* 2025. 5. 21. kdk	정리
+* </pre>
+*
+* 작은 파일 파싱에 유리
+*
+* @author kdk
+*/
 public class GsonUtil {
-
-	private static final Logger logger = LoggerFactory.getLogger(GsonUtil.class);
 
 	private GsonUtil() {
 		super();
 	}
 
-	private static Gson getInstance() {
-		// new Gson();	- 유니코드 지원안함
-		return new GsonBuilder().disableHtmlEscaping().create();
-	}
+	private static GsonUtil instance;
+	private Gson gson;
 
-	public static String prettyPrintString(String jsonStr) {
-		Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-		return gson.toJson(jsonStr);
-	}
+	private static final Logger logger = LoggerFactory.getLogger(GsonUtil.class);
+
+	private static synchronized GsonUtil getInstance(boolean isPretty) {
+        if (instance == null) {
+			instance = new GsonUtil();
+			// 유니코드 지원안함
+//			instance.gson = new Gson();
+
+			if (isPretty) {
+				instance.gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+			} else {
+				instance.gson = new GsonBuilder().disableHtmlEscaping().create();
+			}
+        } else {
+			if (isPretty) {
+				instance.gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+			} else {
+				instance.gson = new GsonBuilder().disableHtmlEscaping().create();
+			}
+        }
+
+        return instance;
+    }
 
 	public static class ToJson {
+		public static String converterObjToJsonStr(Object obj, boolean isPretty) {
+			if ( obj == null ) {
+				throw new IllegalArgumentException("obj is null");
+			}
 
-		protected ToJson() {
-			super();
-		}
-
-		public static String converterObjToJsonStr(Object obj) {
 			String sJson = "";
 
-			Gson gson = getInstance();
-
 			try {
-				sJson = gson.toJson(obj);
+				getInstance(isPretty);
+				sJson = instance.gson.toJson(obj);
 			} catch (Exception e) {
 				logger.error("", e);
 			}
@@ -66,29 +81,35 @@ public class GsonUtil {
 			return sJson;
 		}
 
-		public static String converterMapToJsonStr(Map<String, Object> map) {
-			return converterObjToJsonStr(map);
+		public static String converterMapToJsonStr(Map<String, Object> map, boolean isPretty) {
+			if ( map == null || map.isEmpty() ) {
+				throw new IllegalArgumentException("map is null");
+			}
+
+			return converterObjToJsonStr(map, isPretty);
 		}
 
-		public static String converterListToJsonStr(List<?> list) {
-			return converterObjToJsonStr(list);
+		public static String converterListToJsonStr(List<?> list, boolean isPretty) {
+			if ( list == null || list.isEmpty() ) {
+				throw new IllegalArgumentException("list is null");
+			}
+
+			return converterObjToJsonStr(list, isPretty);
 		}
 	}
 
 	public static class FromJson {
-
-		protected FromJson() {
-			super();
-		}
-
 		@SuppressWarnings("unchecked")
 		public static Map<String, Object> converterJsonStrToMap(String sJson) {
+			if ( StringUtils.isBlank(sJson) ) {
+				throw new IllegalArgumentException("sJson is null");
+			}
+
 			Map<String, Object> map = new HashMap<>();
 
-			Gson gson = getInstance();
-
 			try {
-				map = gson.fromJson(sJson, Map.class);
+				getInstance(false);
+				map = instance.gson.fromJson(sJson, Map.class);
 			} catch (Exception e) {
 				logger.error("", e);
 			}
@@ -97,12 +118,15 @@ public class GsonUtil {
 		}
 
 		public static JsonObject converterJsonStrToJsonObj(String sJson) {
+			if ( StringUtils.isBlank(sJson) ) {
+				throw new IllegalArgumentException("sJson is null");
+			}
+
 			JsonObject jsonObj = null;
 
-			Gson gson = getInstance();
-
 			try {
-				jsonObj = gson.fromJson(sJson, JsonObject.class);
+				getInstance(false);
+				jsonObj = instance.gson.fromJson(sJson, JsonObject.class);
 			} catch (Exception e) {
 				logger.error("", e);
 			}
@@ -111,12 +135,15 @@ public class GsonUtil {
 		}
 
 		public static List<?> converterJsonStrToList(String sJsonArr) {
+			if ( StringUtils.isBlank(sJsonArr) ) {
+				throw new IllegalArgumentException("sJsonArr is null");
+			}
+
 			List<?> list = new ArrayList<>();
 
-			Gson gson = getInstance();
-
 			try {
-				list = gson.fromJson(sJsonArr, List.class);
+				getInstance(false);
+				list = instance.gson.fromJson(sJsonArr, List.class);
 			} catch (Exception e) {
 				logger.error("", e);
 			}
@@ -125,12 +152,15 @@ public class GsonUtil {
 		}
 
 		public static JsonArray converterJsonStrToJsonArray(String sJsonArr) {
+			if ( StringUtils.isBlank(sJsonArr) ) {
+				throw new IllegalArgumentException("sJsonArr is null");
+			}
+
 			JsonArray jsonArray = null;
 
-			Gson gson = getInstance();
-
 			try {
-				jsonArray = gson.fromJson(sJsonArr, JsonArray.class);
+				getInstance(false);
+				jsonArray = instance.gson.fromJson(sJsonArr, JsonArray.class);
 			} catch (Exception e) {
 				logger.error("", e);
 			}
@@ -139,10 +169,17 @@ public class GsonUtil {
 		}
 
 		public static <T> T converterJsonStrToClass(String jsonStr, Class<T> clazz) {
-			Gson gson = getInstance();
+			if ( StringUtils.isBlank(jsonStr) ) {
+				throw new IllegalArgumentException("jsonStr is null");
+			}
+
+			if ( clazz == null ) {
+				throw new IllegalArgumentException("clazz is null");
+			}
 
 			try {
-				Object result = gson.fromJson(jsonStr, clazz);
+				getInstance(false);
+				Object result = instance.gson.fromJson(jsonStr, clazz);
 				return clazz.cast(result);
 			} catch (Exception e) {
 				logger.error("", e);
@@ -152,18 +189,21 @@ public class GsonUtil {
 	}
 
 	public static class ReadJsonFile {
-
-		protected ReadJsonFile() {
-			super();
-		}
-
 		public static Object readJsonFileObject(String sfileName, Type type) {
+			if ( StringUtils.isBlank(sfileName) ) {
+				throw new IllegalArgumentException("sfileName is null");
+			}
+
+			if ( type == null ) {
+				throw new IllegalArgumentException("type is null");
+			}
+
 			Object obj = null;
-			Gson gson = getInstance();
 
 			try {
+				getInstance(false);
 				JsonReader reader = new JsonReader(new FileReader(sfileName));
-				obj = gson.fromJson(reader, type);
+				obj = instance.gson.fromJson(reader, type);
 			} catch (FileNotFoundException e) {
 				logger.error("", e);
 			}
@@ -173,12 +213,20 @@ public class GsonUtil {
 
 		@SuppressWarnings("unchecked")
 		public static <T> List<T> readJsonFileArray(String sfileName, Type type) {
+			if ( StringUtils.isBlank(sfileName) ) {
+				throw new IllegalArgumentException("sfileName is null");
+			}
+
+			if ( type == null ) {
+				throw new IllegalArgumentException("type is null");
+			}
+
 			Object obj = null;
-			Gson gson = getInstance();
 
 			try {
+				getInstance(false);
 				JsonReader reader = new JsonReader(new FileReader(sfileName));
-				obj = gson.fromJson(reader, type);
+				obj = instance.gson.fromJson(reader, type);
 			} catch (FileNotFoundException e) {
 				logger.error("", e);
 			}

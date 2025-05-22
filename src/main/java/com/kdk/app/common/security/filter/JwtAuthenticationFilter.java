@@ -72,7 +72,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			}
 
 			if ( !StringUtils.isBlank(commonResVo.getCode()) ) {
-				String sMessage = JacksonUtil.ToJson.converterObjToJsonStr(commonResVo);
+				String sMessage = JacksonUtil.ToJson.converterObjToJsonStr(commonResVo, false);
 
 				response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 				response.setCharacterEncoding(StandardCharsets.UTF_8.toString());

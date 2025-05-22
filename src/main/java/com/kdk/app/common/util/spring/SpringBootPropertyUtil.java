@@ -1,5 +1,6 @@
 package com.kdk.app.common.util.spring;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -11,11 +12,11 @@ import com.kdk.app.common.component.ApplicationContextServe;
  * -----------------------------------
  * 개정이력
  * -----------------------------------
- * 2024. 6. 8. 김대광	최초작성
+ * 2024. 6. 7. kdk	최초작성
  * </pre>
  *
  *
- * @author 김대광
+ * @author kdk
  */
 public class SpringBootPropertyUtil {
 
@@ -26,18 +27,27 @@ public class SpringBootPropertyUtil {
 	}
 
 	public static String getProperty(String propertyName, String defaultValue) {
-		String value = defaultValue;
+		if ( StringUtils.isBlank(propertyName) ) {
+			throw new IllegalStateException("propertyName is null");
+		}
+
+		if ( StringUtils.isBlank(defaultValue) ) {
+			throw new IllegalStateException("defaultValue is null");
+		}
+
+		String value = "";
 
 		ApplicationContext applicationContext = ApplicationContextServe.getContext();
 
-		if ( applicationContext.getEnvironment().getProperty(propertyName) == null ) {
-			logger.warn(propertyName + " properties was not loaded.");
+		String property = applicationContext.getEnvironment().getProperty(propertyName);
+		if ( property == null ) {
+			logger.warn("{} properties was not loaded.", propertyName);
+			value = defaultValue;
 		} else {
-			value = applicationContext.getEnvironment().getProperty(propertyName).toString().trim();
+			value = property.trim();
 		}
 
 		return value;
 	}
 
 }
-

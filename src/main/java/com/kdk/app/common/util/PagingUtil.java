@@ -8,11 +8,11 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  * -----------------------------------
  * 개정이력
  * -----------------------------------
- * 2024. 6. 8. 김대광	최초작성
+ * 2024. 6. 7. kdk	최초작성
  * </pre>
  *
  *
- * @author 김대광
+ * @author kdk
  */
 public class PagingUtil {
 

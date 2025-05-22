@@ -87,11 +87,11 @@ public class JwtTokenProvider {
 			.signWith(key, Jwts.SIG.HS256)
 			.compact();
 
-		String sUserJson = GsonUtil.ToJson.converterObjToJsonStr(user);
+		String sUserJson = GsonUtil.ToJson.converterObjToJsonStr(user, false);
 
 		String sKey = SpringBootPropertyUtil.getProperty("crypto.aes.key");
 		String sIv = SpringBootPropertyUtil.getProperty("crypto.aes.iv");
-		String sEncryptUserJson = AesCryptoUtil.getInstance().encrypt(sKey, sIv, AesCryptoUtil.getInstance().AES_CBC_PKCS5PADDING, sUserJson);
+		String sEncryptUserJson = AesCryptoUtil.getInstance().encrypt(sKey, sIv, AesCryptoUtil.AES_CBC_PKCS5PADDING, sUserJson);
 
 		builder.claim(CommonConstants.Jwt.USER_INFO, sEncryptUserJson);
 		builder.claim(CommonConstants.Jwt.TOKEN_KIND, CommonConstants.Jwt.ACCESS_TOKEN);
@@ -123,11 +123,11 @@ public class JwtTokenProvider {
 			.signWith(key, Jwts.SIG.HS256)
 			.compact();
 
-		String sUserJson = GsonUtil.ToJson.converterObjToJsonStr(user);
+		String sUserJson = GsonUtil.ToJson.converterObjToJsonStr(user, false);
 
 		String sKey = SpringBootPropertyUtil.getProperty("crypto.aes.key");
 		String sIv = SpringBootPropertyUtil.getProperty("crypto.aes.iv");
-		String sEncryptUserJson = AesCryptoUtil.getInstance().encrypt(sKey, sIv, AesCryptoUtil.getInstance().AES_CBC_PKCS5PADDING, sUserJson);
+		String sEncryptUserJson = AesCryptoUtil.getInstance().encrypt(sKey, sIv, AesCryptoUtil.AES_CBC_PKCS5PADDING, sUserJson);
 
 		builder.claim(CommonConstants.Jwt.USER_INFO, sEncryptUserJson);
 		builder.claim(CommonConstants.Jwt.TOKEN_KIND, CommonConstants.Jwt.REFRESH_TOKEN);
@@ -269,7 +269,7 @@ public class JwtTokenProvider {
 			String sIv = SpringBootPropertyUtil.getProperty("crypto.aes.iv");
 			String sEncryptUserJson = String.valueOf(claims.get(CommonConstants.Jwt.USER_INFO));
 
-			String sUserJson = AesCryptoUtil.getInstance().decrypt(sKey, sIv, AesCryptoUtil.getInstance().AES_CBC_PKCS5PADDING, sEncryptUserJson);
+			String sUserJson = AesCryptoUtil.getInstance().decrypt(sKey, sIv, AesCryptoUtil.AES_CBC_PKCS5PADDING, sEncryptUserJson);
 
 			Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 			user = gson.fromJson(sUserJson, UserVo.class);

@@ -1,5 +1,7 @@
 package com.kdk.app.common.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,6 +34,22 @@ public class CookieUtil {
 	 * @param domain
 	 */
 	public static void addCookie(HttpServletResponse response, String name, String value, int expiry, boolean isSecure, boolean isUseJs, String domain) {
+		if ( response == null ) {
+			throw new IllegalArgumentException("response is null");
+		}
+
+		if ( StringUtils.isBlank(name) ) {
+			throw new IllegalArgumentException("name is null");
+		}
+
+		if ( StringUtils.isBlank(value) ) {
+			throw new IllegalArgumentException("value is null");
+		}
+
+		if ( expiry < 0 ) {
+			throw new IllegalArgumentException("expiry is negative");
+		}
+
 		Cookie cookie = new Cookie(name, value);
 		cookie.setMaxAge(expiry);
 		cookie.setPath("/");
@@ -42,7 +60,7 @@ public class CookieUtil {
 			cookie.setHttpOnly(true);
 		}
 
-		if ( (domain != null) && (domain.trim().length() > 0) ) {
+		if ( (domain != null) && (!domain.trim().isEmpty()) ) {
 			cookie.setDomain(domain);
 		}
 
@@ -56,6 +74,14 @@ public class CookieUtil {
 	 * @return
 	 */
 	public static Cookie getCookie(HttpServletRequest request, String cookieName) {
+		if ( request == null ) {
+			throw new IllegalArgumentException("request is null");
+		}
+
+		if ( StringUtils.isBlank(cookieName) ) {
+			throw new IllegalArgumentException("cookieName is null");
+		}
+
 		Cookie cookie = null;
 		Cookie[] cookies = request.getCookies();
 
@@ -78,6 +104,14 @@ public class CookieUtil {
 	 * @return
 	 */
 	public static String getCookieValue(HttpServletRequest request, String cookieName) {
+		if ( request == null ) {
+			throw new IllegalArgumentException("request is null");
+		}
+
+		if ( StringUtils.isBlank(cookieName) ) {
+			throw new IllegalArgumentException("cookieName is null");
+		}
+
 		Cookie cookie = getCookie(request, cookieName);
 		return (cookie != null) ? cookie.getValue() : "";
 	}
@@ -88,6 +122,14 @@ public class CookieUtil {
 	 * @param response
 	 */
 	public static void removeCookies(HttpServletRequest request, HttpServletResponse response) {
+		if ( request == null ) {
+			throw new IllegalArgumentException("request is null");
+		}
+
+		if ( response == null ) {
+			throw new IllegalArgumentException("response is null");
+		}
+
 		Cookie[] cookies = request.getCookies();
 
 		if (cookies != null && cookies.length > 0) {
@@ -105,8 +147,17 @@ public class CookieUtil {
 	 * @param request
 	 * @param response
 	 * @param cookieName
+	 * @param domain
 	 */
-	public static void removeCookie(HttpServletResponse response, String cookieName) {
+	public static void removeCookie(HttpServletResponse response, String cookieName, String domain) {
+		if ( response == null ) {
+			throw new IllegalArgumentException("response is null");
+		}
+
+		if ( StringUtils.isBlank(cookieName) ) {
+			throw new IllegalArgumentException("cookieName is null");
+		}
+
 		Cookie cookie = new Cookie(cookieName, null);
 		cookie.setPath("/");
 		cookie.setMaxAge(0);
@@ -119,6 +170,10 @@ public class CookieUtil {
 			cookie.setHttpOnly(true);
 		}
 
+		if ( (domain != null) && (!domain.trim().isEmpty()) ) {
+			cookie.setDomain(domain);
+		}
+
 		response.addCookie(cookie);
 	}
 
@@ -128,6 +183,14 @@ public class CookieUtil {
 	 * @param cookieName
 	 */
 	public static boolean isExist(HttpServletRequest request, String cookieName) {
+		if ( request == null ) {
+			throw new IllegalArgumentException("request is null");
+		}
+
+		if ( StringUtils.isBlank(cookieName) ) {
+			throw new IllegalArgumentException("cookieName is null");
+		}
+
 		String cookieValue = getCookieValue(request, cookieName);
 		return !"".equals(cookieValue);
 	}
@@ -138,6 +201,14 @@ public class CookieUtil {
 	 * @param cookieName
 	 */
 	public static int getCookieMaxAge(HttpServletRequest request, String cookieName) {
+		if ( request == null ) {
+			throw new IllegalArgumentException("request is null");
+		}
+
+		if ( StringUtils.isBlank(cookieName) ) {
+			throw new IllegalArgumentException("cookieName is null");
+		}
+
 		Cookie cookie = getCookie(request, cookieName);
 		return (cookie != null) ? cookie.getMaxAge() : 0;
 	}

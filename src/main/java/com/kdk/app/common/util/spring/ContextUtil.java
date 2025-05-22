@@ -14,13 +14,15 @@ import jakarta.servlet.http.HttpSession;
  * -----------------------------------
  * 개정이력
  * -----------------------------------
- * 2024. 6. 8. 김대광	최초작성
+ * 2024. 6. 7. kdk	최초작성
  * </pre>
  *
  * @see <a href="https://offbyone.tistory.com/144">Ref</a>
- * @author 김대광
+ * @author kdk
  */
 public class ContextUtil {
+
+	private static ContextUtil instance;
 
 	/**
 	 * 외부에서 객체 인스턴스화 불가
@@ -29,12 +31,12 @@ public class ContextUtil {
 		super();
 	}
 
-	private static class LazyHolder {
-		private static final ContextUtil INSTANCE = new ContextUtil();
-	}
+	public static synchronized ContextUtil getInstance() {
+		if (instance == null) {
+			instance = new ContextUtil();
+		}
 
-	public static ContextUtil getInstance() {
-		return LazyHolder.INSTANCE;
+		return instance;
 	}
 
 	/**
@@ -44,7 +46,7 @@ public class ContextUtil {
 	 */
 	public Object getBean(String beanName) {
 		WebApplicationContext context = ContextLoader.getCurrentWebApplicationContext();
-		return context.getBean(beanName);
+		return (context == null) ? null : context.getBean(beanName);
 	}
 
 	/**
