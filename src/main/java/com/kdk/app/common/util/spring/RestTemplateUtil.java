@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +21,8 @@ import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.TrustAllStrategy;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
@@ -43,6 +44,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 개정이력
  * -----------------------------------
  * 2024. 10. 22. 김대광	최초작성
+ * 2025. 05. 22. 김대광   개선
  * </pre>
  *
  * <pre>
@@ -58,80 +60,123 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class RestTemplateUtil {
 
+	private static final Logger logger = LoggerFactory.getLogger(RestTemplateUtil.class);
+
 	private RestTemplateUtil() {
 		super();
 	}
 
-	private static class Config {
-		private static boolean isSSL;
+	private static class RestTemplateProvider {
+		private static RestTemplate secureRestTemplate;
+		private static RestTemplate insecureRestTemplate;
 
-		private static class HttpClientConfig {
-			private static final int TIMEOUT = 5000;
-
-			private static final ConnectionConfig config =
-				ConnectionConfig.custom()
-					.setConnectTimeout(TIMEOUT, TimeUnit.MILLISECONDS)
-					.setSocketTimeout(TIMEOUT, TimeUnit.MILLISECONDS)
-					.build();
-		}
-
-		private static HttpClientConnectionManager createHttpClientConnectionManager(boolean isSSL) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
-			/*
-			 * connection pool 적용
-			 *  - setMaxConnTotal		: 오픈되는 최대 커넥션 수 제한
-			 *  - setMaxConnPerRoute	: IP, 포트 1쌍에 대해 수행 할 연결 수 제한
-			 */
-			if (isSSL) {
-				SSLContext sslContext = SSLContextBuilder.create()
-						.loadTrustMaterial(TrustAllStrategy.INSTANCE)
-						.build();
-
-				DefaultClientTlsStrategy tlsStrategy = new DefaultClientTlsStrategy(
-						sslContext, NoopHostnameVerifier.INSTANCE);
-
-				return PoolingHttpClientConnectionManagerBuilder.create()
-					.setDefaultConnectionConfig(HttpClientConfig.config)
-					.setTlsSocketStrategy(tlsStrategy)
-					.setMaxConnTotal(100)
-					.setMaxConnPerRoute(5)
-					.build();
-			} else {
-				return PoolingHttpClientConnectionManagerBuilder.create()
-					.setDefaultConnectionConfig(HttpClientConfig.config)
-					.setMaxConnTotal(100)
-					.setMaxConnPerRoute(5)
-					.build();
-			}
-		}
-
-		private static class HttpClientInstance {
-			private static CloseableHttpClient getHttpClient(boolean isSSL) {
-				CloseableHttpClient httpClient = null;
-
-				try {
-					httpClient = HttpClients.custom()
-						.setConnectionManager(createHttpClientConnectionManager(isSSL))
-						.build();
-
-				} catch (Exception e) {
-					e.printStackTrace();
+		public static synchronized RestTemplate getRestTemplate(boolean isSsl) {
+			if (isSsl) {
+				if (secureRestTemplate == null) {
+					HttpComponentsClientHttpRequestFactory factory = HttpRequestFactory.getRequestFactory(true);
+					if (factory != null) {
+						secureRestTemplate = new RestTemplate(factory);
+					} else {
+						secureRestTemplate = null;
+					}
 				}
-
-				return httpClient;
+				return secureRestTemplate;
+			} else {
+				if (insecureRestTemplate == null) {
+					HttpComponentsClientHttpRequestFactory factory = HttpRequestFactory.getRequestFactory(false);
+					if (factory != null) {
+						insecureRestTemplate = new RestTemplate(factory);
+					} else {
+						insecureRestTemplate = null;
+					}
+				}
+				return insecureRestTemplate;
 			}
 		}
+	}
 
-		private static class HttpRequestFactory {
-			private static HttpComponentsClientHttpRequestFactory getRequestFactory(boolean isSSL) {
-				return new HttpComponentsClientHttpRequestFactory(HttpClientInstance.getHttpClient(isSSL));
+	private static class Config {
+		private static final int TIMEOUT = 5000;
+
+		private static final ConnectionConfig CONNECTION_CONFIG =
+				ConnectionConfig.custom()
+				.setConnectTimeout(TIMEOUT, TimeUnit.MILLISECONDS)
+				.setSocketTimeout(TIMEOUT, TimeUnit.MILLISECONDS)
+				.build();
+	}
+
+	private static class HttpClientProvider {
+		private static CloseableHttpClient httpClient;
+
+        public static synchronized CloseableHttpClient getHttpClient(boolean isSsl) {
+        	if (httpClient == null) {
+        		try {
+					httpClient = HttpClients.custom()
+							.setConnectionManager(HttpClientConnectionManagerProvider.createHttpClientConnectionManager(isSsl))
+							.build();
+				} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
+					logger.error("", e);
+				}
+        	}
+        	return httpClient;
+        }
+	}
+
+	private static class HttpClientConnectionManagerProvider {
+		private static HttpClientConnectionManager secureHttpClientConnectionManager;
+        private static HttpClientConnectionManager insecureHttpClientConnectionManager;
+
+        public static synchronized HttpClientConnectionManager createHttpClientConnectionManager(boolean isSsl) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
+        	if (isSsl) {
+        		if (secureHttpClientConnectionManager == null) {
+    				SSLContext sslContext = SSLContextBuilder.create()
+    						.loadTrustMaterial(TrustAllStrategy.INSTANCE)
+    						.build();
+
+    				DefaultClientTlsStrategy tlsStrategy = new DefaultClientTlsStrategy(
+    						sslContext, NoopHostnameVerifier.INSTANCE);
+
+    				secureHttpClientConnectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+    						.setDefaultConnectionConfig(Config.CONNECTION_CONFIG)
+    						.setTlsSocketStrategy(tlsStrategy)
+    						.setMaxConnTotal(100)
+    						.setMaxConnPerRoute(5)
+    						.build();
+        		}
+        		return secureHttpClientConnectionManager;
+        	} else {
+        		if (insecureHttpClientConnectionManager == null) {
+        			insecureHttpClientConnectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+        					.setDefaultConnectionConfig(Config.CONNECTION_CONFIG)
+        					.setMaxConnTotal(100)
+        					.setMaxConnPerRoute(5)
+        					.build();
+        		}
+        		return insecureHttpClientConnectionManager;
+        	}
+        }
+	}
+
+	private static class HttpRequestFactory {
+		private static HttpComponentsClientHttpRequestFactory getRequestFactory(boolean isSSL) {
+			CloseableHttpClient httpClient = HttpClientProvider.getHttpClient(isSSL);
+
+			if (httpClient != null) {
+				return new HttpComponentsClientHttpRequestFactory(httpClient);
+			} else {
+				return null;
 			}
 		}
+	}
+
+	private static RestTemplate getRestTemplate(boolean isSsl) {
+		return RestTemplateProvider.getRestTemplate(isSsl);
 	}
 
 	private static class Convert {
 		@SuppressWarnings("unchecked")
 		private static Map<String, Object> objectToMap(Object obj) {
-			Map<String, Object> map = new HashMap<>();
+			Map<String, Object> map = null;
 
 			ObjectMapper oMapper = new ObjectMapper();
 			map = oMapper.convertValue(obj, Map.class);
@@ -142,8 +187,9 @@ public class RestTemplateUtil {
 		private static MultiValueMap<String, String> mapToHttpHeaders(Map<String, Object> headerMap, HttpHeaders headers) {
 			MultiValueMap<String, String> mMap = new LinkedMultiValueMap<>();
 
-			if ( headers.getContentType() != null ) {
-				mMap.add(HttpHeaders.CONTENT_TYPE, headers.getContentType().toString());
+			MediaType mediaType = headers.getContentType();
+			if ( mediaType != null ) {
+				mMap.add(HttpHeaders.CONTENT_TYPE, mediaType.toString());
 			}
 
 			if ( headerMap != null ) {
@@ -178,7 +224,7 @@ public class RestTemplateUtil {
 					mMap.add(sKey, new FileSystemResource(file));
 
 				} else if ( value instanceof MultipartFile ) {
-					final MultipartFile mFile = (MultipartFile) value;
+					MultipartFile mFile = (MultipartFile) value;
 					mMap.add(sKey, new ByteArrayResource(mFile.getBytes()) {
 
 						@Override
@@ -196,30 +242,14 @@ public class RestTemplateUtil {
 		}
 	}
 
-	/**
-	 * LazyHolder Singleton 패턴
-	 *
-	 * @return
-	 */
-	private static class LazyHolder {
-		private static final RestTemplate INSTANCE = new RestTemplate(Config.HttpRequestFactory.getRequestFactory(Config.isSSL));
-	}
-
-	/**
-	 * Singleton 인스턴스 생성
-	 *
-	 * @return
-	 */
-	private static RestTemplate getInstance(boolean isSSL) {
-		Config.isSSL = isSSL;
-		return LazyHolder.INSTANCE;
-	}
-
 	@SuppressWarnings("unchecked")
 	public static ResponseEntity<Object> get(boolean isSSL, String url, MediaType mediaType
 			, Map<String, Object> headerMap, Class<?> responseType, Object... uriVariables) {
 
-		RestTemplate restTemplate = RestTemplateUtil.getInstance(isSSL);
+		RestTemplate restTemplate = RestTemplateUtil.getRestTemplate(isSSL);
+		if (restTemplate == null) {
+			return null;
+		}
 
 		HttpHeaders httpHeaders = new HttpHeaders();
 		if (mediaType != null) {
@@ -248,7 +278,10 @@ public class RestTemplateUtil {
 	public static ResponseEntity<Object> post(boolean isSSL, String url, MediaType mediaType
 			, Map<String, Object> headerMap, Map<String, Object> bodyMap, Class<?> responseType, Object... uriVariables) throws IOException {
 
-		RestTemplate restTemplate = RestTemplateUtil.getInstance(isSSL);
+		RestTemplate restTemplate = RestTemplateUtil.getRestTemplate(isSSL);
+		if (restTemplate == null) {
+			return null;
+		}
 
 		HttpHeaders httpHeaders = new HttpHeaders();
 		if (mediaType != null) {
