@@ -1,9 +1,9 @@
 package com.kdk.app.common.util.spring;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.util.StringUtils;
 
 import com.kdk.app.common.component.ApplicationContextServe;
 
@@ -27,12 +27,8 @@ public class SpringBootPropertyUtil {
 	}
 
 	public static String getProperty(String propertyName, String defaultValue) {
-		if ( StringUtils.isBlank(propertyName) ) {
+		if ( StringUtils.hasText(propertyName) ) {
 			throw new IllegalStateException("propertyName is null");
-		}
-
-		if ( StringUtils.isBlank(defaultValue) ) {
-			throw new IllegalStateException("defaultValue is null");
 		}
 
 		String value = "";

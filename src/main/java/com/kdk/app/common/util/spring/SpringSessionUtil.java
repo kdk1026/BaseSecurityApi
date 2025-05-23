@@ -1,5 +1,7 @@
 package com.kdk.app.common.util.spring;
 
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -31,6 +33,10 @@ public class SpringSessionUtil {
 	 * @param obj
 	 */
 	public static void setSessionLoginInfo(Object obj) {
+		if ( ObjectUtils.isEmpty(obj) ) {
+			throw new IllegalArgumentException("obj is null");
+		}
+
 		ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
 		HttpServletRequest request = attr.getRequest();
 		HttpSession session = request.getSession(false);
@@ -63,6 +69,14 @@ public class SpringSessionUtil {
 
 
 	public static void setSessionAttribute(String sKey, Object obj) {
+		if ( StringUtils.hasText(sKey) ) {
+			throw new IllegalArgumentException("sKey is null");
+		}
+
+		if ( ObjectUtils.isEmpty(obj) ) {
+			throw new IllegalArgumentException("obj is null");
+		}
+
 		ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
 		HttpServletRequest request = attr.getRequest();
 		HttpSession session = request.getSession();
@@ -71,6 +85,18 @@ public class SpringSessionUtil {
 	}
 
 	public static void setSessionAttribute(String sKey, Object obj, int nSecond) {
+		if ( StringUtils.hasText(sKey) ) {
+			throw new IllegalArgumentException("sKey is null");
+		}
+
+		if ( ObjectUtils.isEmpty(obj) ) {
+			throw new IllegalArgumentException("obj is null");
+		}
+
+		if ( nSecond <= 0 ) {
+			throw new IllegalArgumentException("nSecond is invalid");
+		}
+
 		ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
 		HttpServletRequest request = attr.getRequest();
 		HttpSession session = request.getSession();
@@ -81,6 +107,10 @@ public class SpringSessionUtil {
 	}
 
 	public static Object getSessionAttribute(String sKey) {
+		if ( StringUtils.hasText(sKey) ) {
+			throw new IllegalArgumentException("sKey is null");
+		}
+
 		ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
 		HttpServletRequest request = attr.getRequest();
 		HttpSession session = request.getSession(false);

@@ -46,6 +46,18 @@ public class SpringCookieUtil {
 	 * @param domain
 	 */
 	public void addCookie(HttpServletResponse response, String name, String value, int maxAge, boolean isSecure, boolean isHttpOnly, String domain) {
+		if ( response == null ) {
+			throw new IllegalArgumentException("response is null");
+		}
+
+		if ( StringUtils.hasText(name) ) {
+			throw new IllegalArgumentException("name is null");
+		}
+
+		if ( StringUtils.hasText(value) ) {
+			throw new IllegalArgumentException("value is null");
+		}
+
 		ResponseCookie cookie = ResponseCookie.from(value, value)
 				.path("/")
 				.maxAge(maxAge)
