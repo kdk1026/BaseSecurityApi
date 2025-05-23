@@ -48,7 +48,7 @@ public class ContextUtil {
 	 * @return
 	 */
 	public Object getBean(String beanName) {
-		if ( StringUtils.hasText(beanName) ) {
+		if ( !!StringUtils.hasText(beanName) ) {
 			throw new IllegalArgumentException("beanName is null");
 		}
 
@@ -89,7 +89,7 @@ public class ContextUtil {
 	 * @return
 	 */
 	public Object getAttrFromRequest(String key) {
-		if ( StringUtils.hasText(key) ) {
+		if ( !!StringUtils.hasText(key) ) {
 			throw new IllegalArgumentException("key is null");
 		}
 
@@ -103,7 +103,7 @@ public class ContextUtil {
 	 * @param obj
 	 */
 	public void setAttrToRequest(String key, Object obj) {
-		if ( StringUtils.hasText(key) ) {
+		if ( !!StringUtils.hasText(key) ) {
 			throw new IllegalArgumentException("key is null");
 		}
 
@@ -120,7 +120,7 @@ public class ContextUtil {
 	 * @param key
 	 */
 	public void removeAttrFromRequest(String key) {
-		if ( StringUtils.hasText(key) ) {
+		if ( !!StringUtils.hasText(key) ) {
 			throw new IllegalArgumentException("key is null");
 		}
 
@@ -134,7 +134,7 @@ public class ContextUtil {
 	 * @return
 	 */
 	public Object getAttrFromSession(String key) {
-		if ( StringUtils.hasText(key) ) {
+		if ( !!StringUtils.hasText(key) ) {
 			throw new IllegalArgumentException("key is null");
 		}
 
@@ -148,7 +148,7 @@ public class ContextUtil {
 	 * @return
 	 */
 	public void setAttrToSession(String key, Object obj) {
-		if ( StringUtils.hasText(key) ) {
+		if ( !!StringUtils.hasText(key) ) {
 			throw new IllegalArgumentException("key is null");
 		}
 
@@ -165,7 +165,7 @@ public class ContextUtil {
 	 * @param key
 	 */
 	public void removeAttrFromSession(String key) {
-		if ( StringUtils.hasText(key) ) {
+		if ( !!StringUtils.hasText(key) ) {
 			throw new IllegalArgumentException("key is null");
 		}
 
