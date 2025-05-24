@@ -65,6 +65,10 @@ public class GsonUtil {
     }
 
 	public static class ToJson {
+		private ToJson() {
+			super();
+		}
+
 		public static String converterObjToJsonStr(Object obj, boolean isPretty) {
 			if ( obj == null ) {
 				throw new IllegalArgumentException(ExceptionMessage.isNull("obj"));
@@ -100,6 +104,10 @@ public class GsonUtil {
 	}
 
 	public static class FromJson {
+		private FromJson() {
+			super();
+		}
+
 		@SuppressWarnings("unchecked")
 		public static Map<String, Object> converterJsonStrToMap(String sJson) {
 			if ( StringUtils.isBlank(sJson) ) {
@@ -191,6 +199,10 @@ public class GsonUtil {
 	}
 
 	public static class ReadJsonFile {
+		private ReadJsonFile() {
+			super();
+		}
+
 		public static Object readJsonFileObject(String sfileName, Type type) {
 			if ( StringUtils.isBlank(sfileName) ) {
 				throw new IllegalArgumentException(ExceptionMessage.isNull("sfileName"));

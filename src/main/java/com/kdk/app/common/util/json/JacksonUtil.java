@@ -50,6 +50,10 @@ public class JacksonUtil {
     }
 
 	public static class ToJson {
+		private ToJson() {
+			super();
+		}
+
 		public static String converterObjToJsonStr(Object obj, boolean isPretty) {
 			if ( obj == null ) {
 				throw new IllegalArgumentException(ExceptionMessage.isNull("obj"));
@@ -130,6 +134,10 @@ public class JacksonUtil {
 	}
 
 	public static class FromJson {
+		private FromJson() {
+			super();
+		}
+
 		@SuppressWarnings("unchecked")
 		public static Map<String, Object> converterJsonStrToMap(String jsonStr) {
 			if ( StringUtils.isBlank(jsonStr) ) {
@@ -217,6 +225,10 @@ public class JacksonUtil {
 	}
 
 	public static class ReadJsonFile {
+		private ReadJsonFile() {
+			super();
+		}
+
 		public static Object readJsonFileObject(String sfileName, TypeReference<?> typeReference) {
 			if ( StringUtils.isBlank(sfileName) ) {
 				throw new IllegalArgumentException(ExceptionMessage.isNull("sfileName"));
