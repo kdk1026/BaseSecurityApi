@@ -43,7 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JwtTokenProvider {
 
-	private SpringBootProperty springBootProperty;
+	private final SpringBootProperty springBootProperty;
 
 	public JwtTokenProvider(SpringBootProperty springBootProperty) {
 		this.springBootProperty = springBootProperty;

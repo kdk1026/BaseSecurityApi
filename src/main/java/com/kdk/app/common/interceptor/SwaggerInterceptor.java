@@ -29,7 +29,7 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class SwaggerInterceptor implements HandlerInterceptor {
 
-	private SpringBootProperty springBootProperty;
+	private final SpringBootProperty springBootProperty;
 
 	public SwaggerInterceptor(SpringBootProperty springBootProperty) {
 		this.springBootProperty = springBootProperty;

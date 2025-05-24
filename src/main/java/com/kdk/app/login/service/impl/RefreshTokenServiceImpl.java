@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class RefreshTokenServiceImpl implements RefreshTokenService {
 
-	private SpringBootProperty springBootProperty;
+	private final SpringBootProperty springBootProperty;
 
 	public RefreshTokenServiceImpl(SpringBootProperty springBootProperty) {
 		this.springBootProperty = springBootProperty;

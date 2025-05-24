@@ -38,8 +38,8 @@ import jakarta.validation.Valid;
 @RequestMapping("/login")
 public class LoginController {
 
-	private LoginService loginService;
-	private SpringBootProperty springBootProperty;
+	private final LoginService loginService;
+	private final SpringBootProperty springBootProperty;
 
 	public LoginController(LoginService loginService, SpringBootProperty springBootProperty) {
 		this.loginService = loginService;

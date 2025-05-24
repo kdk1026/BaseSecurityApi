@@ -37,8 +37,8 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-	private UserDetailsServiceImpl userDetailsServiceImpl;
-	private SpringBootProperty springBootProperty;
+	private final UserDetailsServiceImpl userDetailsServiceImpl;
+	private final SpringBootProperty springBootProperty;
 
 	public JwtAuthenticationFilter(UserDetailsServiceImpl userDetailsServiceImpl, SpringBootProperty springBootProperty) {
 		this.userDetailsServiceImpl = userDetailsServiceImpl;

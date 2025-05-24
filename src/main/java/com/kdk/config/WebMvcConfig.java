@@ -39,7 +39,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 	@Value("${cors.origins}")
 	private String corsOrigins;
 
-	private SpringBootProperty springBootProperty;
+	private final SpringBootProperty springBootProperty;
 
 	public WebMvcConfig(SpringBootProperty springBootProperty) {
 		this.springBootProperty = springBootProperty;

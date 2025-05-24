@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JwtInterceptor implements HandlerInterceptor {
 
-	private SpringBootProperty springBootProperty;
+	private final SpringBootProperty springBootProperty;
 
 	public JwtInterceptor(SpringBootProperty springBootProperty) {
 		this.springBootProperty = springBootProperty;

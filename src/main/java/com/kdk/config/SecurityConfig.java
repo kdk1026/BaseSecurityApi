@@ -37,8 +37,8 @@ import com.kdk.app.common.security.service.UserDetailsServiceImpl;
 @EnableWebSecurity
 public class SecurityConfig {
 
-	private UserDetailsServiceImpl userDetailsServiceImpl;
-	private SpringBootProperty springBootProperty;
+	private final UserDetailsServiceImpl userDetailsServiceImpl;
+	private final SpringBootProperty springBootProperty;
 
 	public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl, SpringBootProperty springBootProperty) {
 		this.userDetailsServiceImpl = userDetailsServiceImpl;
