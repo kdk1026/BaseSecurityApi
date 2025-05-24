@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.kdk.app.common.component.SpringBootProperty;
 import com.kdk.app.common.jwt.JwtTokenProvider;
 import com.kdk.app.common.security.service.UserDetailsServiceImpl;
 import com.kdk.app.common.util.json.JacksonUtil;
@@ -37,9 +38,11 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private UserDetailsServiceImpl userDetailsServiceImpl;
+	private SpringBootProperty springBootProperty;
 
-	public JwtAuthenticationFilter(UserDetailsServiceImpl userDetailsServiceImpl) {
+	public JwtAuthenticationFilter(UserDetailsServiceImpl userDetailsServiceImpl, SpringBootProperty springBootProperty) {
 		this.userDetailsServiceImpl = userDetailsServiceImpl;
+		this.springBootProperty = springBootProperty;
 	}
 
 	@Override
@@ -47,7 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 		CommonResVo commonResVo = new CommonResVo();
 
-		JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
+		JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(springBootProperty);
 
 		// 1. 헤더에서 토큰 가져오기
 		String sToken = jwtTokenProvider.getTokenFromReqHeader(request);

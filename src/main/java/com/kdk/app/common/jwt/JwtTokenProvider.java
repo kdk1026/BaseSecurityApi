@@ -12,9 +12,9 @@ import org.springframework.web.util.WebUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.kdk.app.common.CommonConstants;
+import com.kdk.app.common.component.SpringBootProperty;
 import com.kdk.app.common.util.crypto.AesCryptoUtil;
 import com.kdk.app.common.util.json.GsonUtil;
-import com.kdk.app.common.util.spring.SpringBootPropertyUtil;
 import com.kdk.app.login.vo.UserVo;
 
 import io.jsonwebtoken.Claims;
@@ -43,37 +43,26 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JwtTokenProvider {
 
-	public static class JwtToken {
-		public String accessToken;
-		public String refreshToken;
+	private SpringBootProperty springBootProperty;
+
+	public JwtTokenProvider(SpringBootProperty springBootProperty) {
+		this.springBootProperty = springBootProperty;
 	}
 
 // ------------------------------------------------------------------------
 // 토큰 생성
 // ------------------------------------------------------------------------
 	/**
-	 * JWT 토큰 생성
-	 * @param user
-	 * @return
-	 */
-	public JwtToken generateToken(UserVo user) {
-		JwtToken jwtToken = new JwtToken();
-		jwtToken.accessToken = this.generateAccessToken(user);
-		jwtToken.refreshToken = this.generateRefreshToken(user);
-		return jwtToken;
-	}
-
-	/**
 	 * Access 토큰 생성
 	 * @param user
 	 * @return
 	 */
 	public String generateAccessToken(UserVo user) {
-		String sExpireTime = SpringBootPropertyUtil.getProperty("jwt.access.expire.minute");
-		String sSubject = SpringBootPropertyUtil.getProperty("jwt.subject");
-		String sIssuer = SpringBootPropertyUtil.getProperty("jwt.issuer");
+		String sExpireTime = springBootProperty.getProperty("jwt.access.expire.minute");
+		String sSubject = springBootProperty.getProperty("jwt.subject");
+		String sIssuer = springBootProperty.getProperty("jwt.issuer");
 
-		String sSecretKey = SpringBootPropertyUtil.getProperty("jwt.secret.key");
+		String sSecretKey = springBootProperty.getProperty("jwt.secret.key");
 		SecretKey key = Keys.hmacShaKeyFor(sSecretKey.getBytes());
 
 		JwtBuilder builder = Jwts.builder();
@@ -89,8 +78,8 @@ public class JwtTokenProvider {
 
 		String sUserJson = GsonUtil.ToJson.converterObjToJsonStr(user, false);
 
-		String sKey = SpringBootPropertyUtil.getProperty("crypto.aes.key");
-		String sIv = SpringBootPropertyUtil.getProperty("crypto.aes.iv");
+		String sKey = springBootProperty.getProperty("crypto.aes.key");
+		String sIv = springBootProperty.getProperty("crypto.aes.iv");
 		String sEncryptUserJson = AesCryptoUtil.getInstance().encrypt(sKey, sIv, AesCryptoUtil.AES_CBC_PKCS5PADDING, sUserJson);
 
 		builder.claim(CommonConstants.Jwt.USER_INFO, sEncryptUserJson);
@@ -105,11 +94,11 @@ public class JwtTokenProvider {
 	 * @return
 	 */
 	public String generateRefreshToken(UserVo user) {
-		String sExpireTime = SpringBootPropertyUtil.getProperty("jwt.refresh.expire.minute");
-		String sSubject = SpringBootPropertyUtil.getProperty("jwt.subject");
-		String sIssuer = SpringBootPropertyUtil.getProperty("jwt.issuer");
+		String sExpireTime = springBootProperty.getProperty("jwt.refresh.expire.minute");
+		String sSubject = springBootProperty.getProperty("jwt.subject");
+		String sIssuer = springBootProperty.getProperty("jwt.issuer");
 
-		String sSecretKey = SpringBootPropertyUtil.getProperty("jwt.secret.key");
+		String sSecretKey = springBootProperty.getProperty("jwt.secret.key");
 		SecretKey key = Keys.hmacShaKeyFor(sSecretKey.getBytes());
 
 		JwtBuilder builder = Jwts.builder();
@@ -125,8 +114,8 @@ public class JwtTokenProvider {
 
 		String sUserJson = GsonUtil.ToJson.converterObjToJsonStr(user, false);
 
-		String sKey = SpringBootPropertyUtil.getProperty("crypto.aes.key");
-		String sIv = SpringBootPropertyUtil.getProperty("crypto.aes.iv");
+		String sKey = springBootProperty.getProperty("crypto.aes.key");
+		String sIv = springBootProperty.getProperty("crypto.aes.iv");
 		String sEncryptUserJson = AesCryptoUtil.getInstance().encrypt(sKey, sIv, AesCryptoUtil.AES_CBC_PKCS5PADDING, sUserJson);
 
 		builder.claim(CommonConstants.Jwt.USER_INFO, sEncryptUserJson);
@@ -160,7 +149,7 @@ public class JwtTokenProvider {
 	 */
 	public String getTokenFromCookie(HttpServletRequest request) {
 		Cookie cookie = WebUtils.getCookie(request, CommonConstants.Jwt.ACCESS_TOKEN);
-		return cookie.getValue();
+		return cookie == null ? null : cookie.getValue();
 	}
 
 	/**
@@ -171,10 +160,10 @@ public class JwtTokenProvider {
 	public String getTokenFromReqHeader(HttpServletRequest request) {
 		String sToken = null;
 
-		String sJwtHeader = SpringBootPropertyUtil.getProperty("jwt.header");
+		String sJwtHeader = springBootProperty.getProperty("jwt.header");
 
 		String sAuthorizationHeader = request.getHeader(sJwtHeader);
-		String sTokenType = SpringBootPropertyUtil.getProperty("jwt.token.type");
+		String sTokenType = springBootProperty.getProperty("jwt.token.type");
 
 		if ( sTokenType.lastIndexOf(" ") == -1 ) {
 			sTokenType = sTokenType + " ";
@@ -193,7 +182,7 @@ public class JwtTokenProvider {
 	 * @return (0: false, 1: true, 2: expired)
 	 */
 	public int isValidateJwtToken(String token) {
-		String sSecretKey = SpringBootPropertyUtil.getProperty("jwt.secret.key");
+		String sSecretKey = springBootProperty.getProperty("jwt.secret.key");
 		SecretKey key = Keys.hmacShaKeyFor(sSecretKey.getBytes());
 
 		try {
@@ -226,7 +215,7 @@ public class JwtTokenProvider {
 	 * @return
 	 */
 	public Date getExpirationFromJwt(String token) {
-		String sSecretKey = SpringBootPropertyUtil.getProperty("jwt.secret.key");
+		String sSecretKey = springBootProperty.getProperty("jwt.secret.key");
 		SecretKey key = Keys.hmacShaKeyFor(sSecretKey.getBytes());
 
 		Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
@@ -240,7 +229,7 @@ public class JwtTokenProvider {
 	 * @return
 	 */
 	public String getTokenKind(String token) {
-		String sSecretKey = SpringBootPropertyUtil.getProperty("jwt.secret.key");
+		String sSecretKey = springBootProperty.getProperty("jwt.secret.key");
 		SecretKey key = Keys.hmacShaKeyFor(sSecretKey.getBytes());
 
 		Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
@@ -260,13 +249,13 @@ public class JwtTokenProvider {
 		UserVo user = null;
 
 		if ( !StringUtils.isEmpty(token) ) {
-			String sSecretKey = SpringBootPropertyUtil.getProperty("jwt.secret.key");
+			String sSecretKey = springBootProperty.getProperty("jwt.secret.key");
 			SecretKey key = Keys.hmacShaKeyFor(sSecretKey.getBytes());
 
 			Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
 
-			String sKey = SpringBootPropertyUtil.getProperty("crypto.aes.key");
-			String sIv = SpringBootPropertyUtil.getProperty("crypto.aes.iv");
+			String sKey = springBootProperty.getProperty("crypto.aes.key");
+			String sIv = springBootProperty.getProperty("crypto.aes.iv");
 			String sEncryptUserJson = String.valueOf(claims.get(CommonConstants.Jwt.USER_INFO));
 
 			String sUserJson = AesCryptoUtil.getInstance().decrypt(sKey, sIv, AesCryptoUtil.AES_CBC_PKCS5PADDING, sEncryptUserJson);
@@ -279,4 +268,3 @@ public class JwtTokenProvider {
 	}
 
 }
-

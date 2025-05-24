@@ -15,6 +15,7 @@ import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kdk.app.common.component.SpringBootProperty;
 import com.kdk.app.common.interceptor.SwaggerInterceptor;
 import com.kdk.config.mvc.HTMLCharacterEscapes;
 
@@ -37,6 +38,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
 	@Value("${cors.origins}")
 	private String corsOrigins;
+
+	private SpringBootProperty springBootProperty;
+
+	public WebMvcConfig(SpringBootProperty springBootProperty) {
+		this.springBootProperty = springBootProperty;
+	}
 
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
@@ -61,7 +68,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor( new SwaggerInterceptor() )
+		registry.addInterceptor( new SwaggerInterceptor(springBootProperty) )
 			.addPathPatterns("/swagger-ui/index.html");
 	}
 
@@ -74,7 +81,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
 	@Override
 	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-		converters.removeIf(converter -> converter instanceof MappingJackson2HttpMessageConverter);
+		converters.removeIf(MappingJackson2HttpMessageConverter.class::isInstance);
         HttpMessageConverter<?> httpMessageConverter = this.jsonEscapeConverter();
         converters.add(httpMessageConverter);
 	}

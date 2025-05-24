@@ -8,6 +8,8 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.kdk.app.common.ExceptionMessage;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -49,7 +51,7 @@ public class ContextUtil {
 	 */
 	public Object getBean(String beanName) {
 		if ( !StringUtils.hasText(beanName) ) {
-			throw new IllegalArgumentException("beanName is null");
+			throw new IllegalArgumentException(ExceptionMessage.isNull("beanName"));
 		}
 
 		WebApplicationContext context = ContextLoader.getCurrentWebApplicationContext();
@@ -90,7 +92,7 @@ public class ContextUtil {
 	 */
 	public Object getAttrFromRequest(String key) {
 		if ( !StringUtils.hasText(key) ) {
-			throw new IllegalArgumentException("key is null");
+			throw new IllegalArgumentException(ExceptionMessage.isNull("key"));
 		}
 
 		RequestAttributes attr = RequestContextHolder.currentRequestAttributes();
@@ -104,11 +106,11 @@ public class ContextUtil {
 	 */
 	public void setAttrToRequest(String key, Object obj) {
 		if ( !StringUtils.hasText(key) ) {
-			throw new IllegalArgumentException("key is null");
+			throw new IllegalArgumentException(ExceptionMessage.isNull("key"));
 		}
 
 		if ( ObjectUtils.isEmpty(obj) ) {
-			throw new IllegalArgumentException("obj is null");
+			throw new IllegalArgumentException(ExceptionMessage.isNull("obj"));
 		}
 
 		RequestAttributes attr = RequestContextHolder.currentRequestAttributes();
@@ -149,11 +151,11 @@ public class ContextUtil {
 	 */
 	public void setAttrToSession(String key, Object obj) {
 		if ( !StringUtils.hasText(key) ) {
-			throw new IllegalArgumentException("key is null");
+			throw new IllegalArgumentException(ExceptionMessage.isNull("key"));
 		}
 
 		if ( ObjectUtils.isEmpty(obj) ) {
-			throw new IllegalArgumentException("obj is null");
+			throw new IllegalArgumentException(ExceptionMessage.isNull("obj"));
 		}
 
 		RequestAttributes attr = RequestContextHolder.currentRequestAttributes();
@@ -166,7 +168,7 @@ public class ContextUtil {
 	 */
 	public void removeAttrFromSession(String key) {
 		if ( !StringUtils.hasText(key) ) {
-			throw new IllegalArgumentException("key is null");
+			throw new IllegalArgumentException(ExceptionMessage.isNull("key"));
 		}
 
 		RequestAttributes attr = RequestContextHolder.currentRequestAttributes();

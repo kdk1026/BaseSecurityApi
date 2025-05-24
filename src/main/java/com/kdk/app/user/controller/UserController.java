@@ -1,6 +1,5 @@
 package com.kdk.app.user.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,8 +30,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/user")
 public class UserController {
 
-	@Autowired
 	private ConfirmService confirmService;
+
+	public UserController(ConfirmService confirmService) {
+		this.confirmService = confirmService;
+	}
 
 	@Operation(summary = "User 확인")
 	@GetMapping(value = "confirm", produces = MediaType.APPLICATION_JSON_VALUE)

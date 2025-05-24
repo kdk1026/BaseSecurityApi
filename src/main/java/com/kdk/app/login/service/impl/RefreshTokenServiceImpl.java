@@ -6,9 +6,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.kdk.app.common.CommonConstants;
+import com.kdk.app.common.component.SpringBootProperty;
 import com.kdk.app.common.jwt.JwtTokenProvider;
 import com.kdk.app.common.util.date.Jsr310DateUtil;
-import com.kdk.app.common.util.spring.SpringBootPropertyUtil;
 import com.kdk.app.common.vo.ResponseCodeEnum;
 import com.kdk.app.login.service.RefreshTokenService;
 import com.kdk.app.login.vo.LoginResVo;
@@ -32,11 +32,17 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class RefreshTokenServiceImpl implements RefreshTokenService {
 
-	@Override
-	public LoginResVo refreshToken(RefreshTokenParamVo refreshTokenParamVo) throws Exception {
-		LoginResVo loginResVo = new LoginResVo();
+	private SpringBootProperty springBootProperty;
 
-		JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
+	public RefreshTokenServiceImpl(SpringBootProperty springBootProperty) {
+		this.springBootProperty = springBootProperty;
+	}
+
+	@Override
+	public LoginResVo refreshToken(RefreshTokenParamVo refreshTokenParamVo) {
+		LoginResVo loginResVo;
+
+		JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(springBootProperty);
 
 		// ------------------------------------------------------------------------
 		// 접근 토큰 유효성 검증
@@ -45,10 +51,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
 		loginResVo = this.validToken(sAccessToken, jwtTokenProvider, 1);
 
-		if ( !StringUtils.isBlank(loginResVo.getCode()) ) {
-			if ( !ResponseCodeEnum.ACCESS_TOKEN_EXPIRED.getCode().equals(loginResVo.getCode()) ) {
-				return loginResVo;
-			}
+		if ( !StringUtils.isBlank(loginResVo.getCode())
+				&& !ResponseCodeEnum.ACCESS_TOKEN_EXPIRED.getCode().equals(loginResVo.getCode()) ) {
+			return loginResVo;
 		}
 
 		// ------------------------------------------------------------------------
@@ -91,7 +96,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 		//--------------------------------------------------
 		// Access 토큰 응답 설정
 		//--------------------------------------------------
-		String sAccessTokenExpireMin = SpringBootPropertyUtil.getProperty("jwt.access.expire.minute");
+		String sAccessTokenExpireMin = springBootProperty.getProperty("jwt.access.expire.minute");
 		int nAccessTokenExpireMin = Integer.parseInt(sAccessTokenExpireMin);
 
 		loginResVo.setAccessTokenExpireSecond(nAccessTokenExpireMin * 60);
@@ -111,14 +116,14 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 			//--------------------------------------------------
 			// Refresh 토큰 응답 설정
 			//--------------------------------------------------
-			String sRefreshTokenExpireMin = SpringBootPropertyUtil.getProperty("jwt.refresh.expire.minute");
+			String sRefreshTokenExpireMin = springBootProperty.getProperty("jwt.refresh.expire.minute");
 			int nRefreshTokenExpireMin = Integer.parseInt(sRefreshTokenExpireMin);
 
 			loginResVo.setRefreshTokenExpireSecond(nRefreshTokenExpireMin * 60);
 			loginResVo.setRefreshToken(sNewRefreshToken);
 		}
 
-		String sTokenType = SpringBootPropertyUtil.getProperty("jwt.token.type");
+		String sTokenType = springBootProperty.getProperty("jwt.token.type");
 		if ( sTokenType.lastIndexOf(" ") == -1 ) {
 			sTokenType = sTokenType + " ";
 		}

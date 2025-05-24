@@ -1,6 +1,5 @@
 package com.kdk.app.login.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -37,8 +36,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/login")
 public class RefreshTokenController {
 
-	@Autowired
 	private RefreshTokenService refreshTokenService;
+
+	public RefreshTokenController(RefreshTokenService refreshTokenService) {
+		this.refreshTokenService = refreshTokenService;
+	}
 
 	@Operation(summary = "로그인")
 	@GetMapping(value = "refresh-token", produces = MediaType.APPLICATION_JSON_VALUE)

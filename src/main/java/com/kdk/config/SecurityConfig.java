@@ -1,14 +1,15 @@
 package com.kdk.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
@@ -16,9 +17,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.kdk.app.common.component.SpringBootProperty;
 import com.kdk.app.common.security.filter.JwtAuthenticationFilter;
 import com.kdk.app.common.security.service.UserDetailsServiceImpl;
-import com.kdk.app.common.util.spring.SpringBootPropertyUtil;
 
 /**
  * <pre>
@@ -36,21 +37,26 @@ import com.kdk.app.common.util.spring.SpringBootPropertyUtil;
 @EnableWebSecurity
 public class SecurityConfig {
 
-	@Autowired
 	private UserDetailsServiceImpl userDetailsServiceImpl;
+	private SpringBootProperty springBootProperty;
+
+	public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl, SpringBootProperty springBootProperty) {
+		this.userDetailsServiceImpl = userDetailsServiceImpl;
+		this.springBootProperty = springBootProperty;
+	}
 
 	@Bean
     WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring()
+        return web -> web.ignoring()
         		.requestMatchers("/favicon.ico", "/", "/swagger-ui/**", "/v3/**", "/login/**");
 	}
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		JwtAuthenticationFilter jwtAuthFilter = new JwtAuthenticationFilter(userDetailsServiceImpl);
+		JwtAuthenticationFilter jwtAuthFilter = new JwtAuthenticationFilter(userDetailsServiceImpl, springBootProperty);
 
 		http
-			.authorizeHttpRequests((authorizeHttpRequests) ->
+			.authorizeHttpRequests(authorizeHttpRequests ->
 				authorizeHttpRequests
 					.requestMatchers("/admin/**").hasRole("ADMIN")
 					.requestMatchers("/manager/**").hasAnyRole("ADMIN", "MANAGER")
@@ -59,14 +65,12 @@ public class SecurityConfig {
 					.requestMatchers("/test/**").permitAll()
 					.anyRequest().authenticated()
 			)
-			.formLogin((formLogin) ->
-				formLogin
-					.disable()
+			.formLogin(AbstractHttpConfigurer::disable
 			)
-			.csrf((csrf) -> csrf.disable())
+			.csrf(csrf -> csrf.disable())
 			.cors(this.corsCustomizer())
 			.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-			.headers((headers) ->
+			.headers(headers ->
 				headers
 					.httpStrictTransportSecurity(this.hstsCustomizer())
 					.frameOptions(this.frameOptionsCustomizer())
@@ -79,14 +83,14 @@ public class SecurityConfig {
 	}
 
     private Customizer<CorsConfigurer<HttpSecurity>> corsCustomizer() {
-        return (cors) -> cors.configurationSource(this.corsConfigurationSource());
+        return cors -> cors.configurationSource(this.corsConfigurationSource());
     }
 
 	CorsConfigurationSource corsConfigurationSource() {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		CorsConfiguration configuration = new CorsConfiguration();
 
-		String corsOrigins = SpringBootPropertyUtil.getProperty("cors.origins");
+		String corsOrigins = springBootProperty.getProperty("cors.origins");
 
 		configuration.addAllowedOriginPattern(corsOrigins);
 		configuration.addAllowedMethod("GET");
@@ -109,7 +113,7 @@ public class SecurityConfig {
 	}
 
 	private Customizer<HeadersConfigurer<HttpSecurity>.FrameOptionsConfig> frameOptionsCustomizer() {
-		return frameOptions -> frameOptions.deny();
+		return FrameOptionsConfig::deny;
 	}
 
 	private Customizer<HeadersConfigurer<HttpSecurity>.XXssConfig> xssCustomizer() {

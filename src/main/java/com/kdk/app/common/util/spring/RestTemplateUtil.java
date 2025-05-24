@@ -38,6 +38,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kdk.app.common.ExceptionMessage;
 
 /**
  * <pre>
@@ -248,11 +249,11 @@ public class RestTemplateUtil {
 			, Map<String, Object> headerMap, Class<?> responseType, Object... uriVariables) {
 
 		if ( StringUtils.hasLength(url) ) {
-			throw new IllegalArgumentException("url is null");
+			throw new IllegalArgumentException(ExceptionMessage.isNull("url"));
 		}
 
 		if ( responseType == null ) {
-			throw new IllegalArgumentException("responseType is null");
+			throw new IllegalArgumentException(ExceptionMessage.isNull("responseType"));
 		}
 
 		RestTemplate restTemplate = RestTemplateUtil.getRestTemplate(isSSL);
@@ -288,11 +289,11 @@ public class RestTemplateUtil {
 			, Map<String, Object> headerMap, Map<String, Object> bodyMap, Class<?> responseType, Object... uriVariables) throws IOException {
 
 		if ( StringUtils.hasLength(url) ) {
-			throw new IllegalArgumentException("url is null");
+			throw new IllegalArgumentException(ExceptionMessage.isNull("url"));
 		}
 
 		if ( responseType == null ) {
-			throw new IllegalArgumentException("responseType is null");
+			throw new IllegalArgumentException(ExceptionMessage.isNull("responseType"));
 		}
 
 		RestTemplate restTemplate = RestTemplateUtil.getRestTemplate(isSSL);

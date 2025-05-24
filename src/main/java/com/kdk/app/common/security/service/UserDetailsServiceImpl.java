@@ -3,7 +3,6 @@ package com.kdk.app.common.security.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -29,8 +28,11 @@ import com.kdk.app.login.vo.UserVo;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-	@Autowired
 	private LoginService loginService;
+
+	public UserDetailsServiceImpl(LoginService loginService) {
+		this.loginService = loginService;
+	}
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -47,7 +49,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 			grantedAuthorities.add(new SimpleGrantedAuthority(authority));
 		}
 
-		boolean enabled = "Y".equals(vo.getUseYn()) ? true : false;
+		boolean enabled = "Y".equals(vo.getUseYn());
 
 		return new User(vo.getUsername(), vo.getPassword(), enabled, true, true, true, grantedAuthorities);
 	}

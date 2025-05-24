@@ -8,8 +8,11 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.kdk.app.common.ExceptionMessage;
 
 /**
  * <pre>
@@ -20,6 +23,8 @@ import org.slf4j.LoggerFactory;
  * </pre>
  *
  * <pre>
+ * FrontEnd와 암복호화 처리용
+ *
  * - 암호화 키 : 128비트(16자), 192비트(24자), 256비트(32자)
  * - iv : 16자
  * </pre>
@@ -44,12 +49,28 @@ public class AesCryptoUtil {
         return instance;
     }
 
-	private final String CHARSET = StandardCharsets.UTF_8.toString();
+	private static final String CHARSET = StandardCharsets.UTF_8.toString();
 
 	public static final String AES_CBC_PKCS5PADDING ="AES/CBC/PKCS5Padding";
 	public static final String AES_ECB_PKCS5PADDING ="AES/ECB/PKCS5Padding";
 
 	public String encrypt(String key, String iv, String padding, String plainText) {
+		if ( StringUtils.isBlank(key) ) {
+			throw new IllegalArgumentException(ExceptionMessage.isNull("key"));
+		}
+
+		if ( StringUtils.isBlank(iv) ) {
+			throw new IllegalArgumentException(ExceptionMessage.isNull("iv"));
+		}
+
+		if ( StringUtils.isBlank(padding) ) {
+			throw new IllegalArgumentException(ExceptionMessage.isNull("padding"));
+		}
+
+		if ( StringUtils.isBlank(plainText) ) {
+			throw new IllegalArgumentException(ExceptionMessage.isNull("plainText"));
+		}
+
 		String sEncryptText = "";
 
 		try {
@@ -76,6 +97,22 @@ public class AesCryptoUtil {
 	}
 
 	public String decrypt(String key, String iv, String padding, String encryptText) {
+		if ( StringUtils.isBlank(key) ) {
+			throw new IllegalArgumentException(ExceptionMessage.isNull("key"));
+		}
+
+		if ( StringUtils.isBlank(iv) ) {
+			throw new IllegalArgumentException(ExceptionMessage.isNull("iv"));
+		}
+
+		if ( StringUtils.isBlank(padding) ) {
+			throw new IllegalArgumentException(ExceptionMessage.isNull("padding"));
+		}
+
+		if ( StringUtils.isBlank(encryptText) ) {
+			throw new IllegalArgumentException(ExceptionMessage.isNull("encryptText"));
+		}
+
 		String sDecryptText = "";
 		try {
 			SecretKey secretKey = new SecretKeySpec(key.getBytes(CHARSET), "AES");

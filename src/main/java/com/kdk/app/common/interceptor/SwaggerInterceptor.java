@@ -7,9 +7,9 @@ import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import com.kdk.app.common.component.SpringBootProperty;
 import com.kdk.app.common.util.RequestUtil;
 import com.kdk.app.common.util.json.GsonUtil;
-import com.kdk.app.common.util.spring.SpringBootPropertyUtil;
 import com.kdk.app.common.vo.CommonResVo;
 import com.kdk.app.common.vo.ResponseCodeEnum;
 
@@ -29,14 +29,20 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class SwaggerInterceptor implements HandlerInterceptor {
 
+	private SpringBootProperty springBootProperty;
+
+	public SwaggerInterceptor(SpringBootProperty springBootProperty) {
+		this.springBootProperty = springBootProperty;
+	}
+
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 
-		String[] sAllowIps = SpringBootPropertyUtil.getProperty("swagger.allow.ip").split(",");
+		String[] sAllowIps = springBootProperty.getProperty("swagger.allow.ip").split(",");
 		List<String> listAllowIp = Arrays.asList(sAllowIps);
 
-		String[] sAllowBands = SpringBootPropertyUtil.getProperty("swagger.allow.band").split(",");
+		String[] sAllowBands = springBootProperty.getProperty("swagger.allow.band").split(",");
 
 		String sReqIp = RequestUtil.getRequestIpAddress(request);
 
