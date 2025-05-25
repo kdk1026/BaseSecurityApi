@@ -14,11 +14,18 @@ import java.nio.charset.StandardCharsets;
  * @author kdk
  */
 public class CommonConstants {
+	private CommonConstants() {
+		super();
+	}
 
 	// ------------------------------------------------------------------------
 	// 인코딩
 	// ------------------------------------------------------------------------
 	public static class Encoding {
+		private Encoding() {
+			super();
+		}
+
 		public static final String UTF_8 = StandardCharsets.UTF_8.toString();
 	}
 
@@ -26,6 +33,10 @@ public class CommonConstants {
 	// 프로파일
 	// ------------------------------------------------------------------------
 	public static class Profile {
+		private Profile() {
+			super();
+		}
+
 		public static final String LOCAL = "local";
 		public static final String DEV = "dev";
 		public static final String PROD = "prod";
@@ -35,6 +46,10 @@ public class CommonConstants {
 	// JWT
 	// ------------------------------------------------------------------------
 	public static class Jwt {
+		private Jwt() {
+			super();
+		}
+
 		public static final String USER_INFO = "userInfo";
 		public static final String TOKEN_KIND = "tokenKind";
 		public static final String ACCESS_TOKEN = "accessToken";
