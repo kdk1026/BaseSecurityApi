@@ -1,5 +1,6 @@
 package com.kdk.app.common.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -65,6 +66,28 @@ public class PagingUtil {
 
 	public PagingUtil(int pagePerRow, int pagePerScreen, int totalCnt, String currentPage, String linkUrl) {
 		super();
+
+		if ( pagePerRow <= 0 ) {
+			throw new IllegalArgumentException("pagePerRow must be greater than 0");
+		}
+
+		if ( pagePerScreen <= 0 ) {
+			throw new IllegalArgumentException("pagePerScreen must be greater than 0");
+		}
+
+		if ( totalCnt <= 0 ) {
+			throw new IllegalArgumentException("totalCnt must be greater than 0");
+		}
+
+		if ( StringUtils.isBlank(currentPage) ) {
+			throw new IllegalArgumentException("currentPage must not be null");
+		}
+
+		boolean isNumeric = currentPage.matches("\\d+");
+		if ( !isNumeric ) {
+			throw new IllegalArgumentException("currentPage not number");
+		}
+
 		this.pagePerRow = pagePerRow;
 		this.pagePerScreen = pagePerScreen;
 		this.totalCnt = totalCnt;
