@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -68,7 +69,7 @@ public class JacksonUtil {
 				} else {
 					jsonStr = instance.mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
 				}
-			} catch (Exception e) {
+			} catch (JsonProcessingException e) {
 				logger.error("", e);
 			}
 			return jsonStr;
@@ -88,7 +89,7 @@ public class JacksonUtil {
 				} else {
 					jsonStr = instance.mapper.writerWithDefaultPrettyPrinter().writeValueAsString(map);
 				}
-			} catch (Exception e) {
+			} catch (JsonProcessingException e) {
 				logger.error("", e);
 			}
 			return jsonStr;
@@ -108,7 +109,7 @@ public class JacksonUtil {
 				} else {
 					jsonStr = instance.mapper.writerWithDefaultPrettyPrinter().writeValueAsString(list);
 				}
-			} catch (Exception e) {
+			} catch (JsonProcessingException e) {
 				logger.error("", e);
 			}
 			return jsonStr;
@@ -149,7 +150,7 @@ public class JacksonUtil {
 			try {
 				getInstance();
 				map = instance.mapper.readValue(jsonStr, Map.class);
-			} catch (Exception e) {
+			} catch (JsonProcessingException e) {
 				logger.error("", e);
 			}
 			return map;
@@ -165,7 +166,7 @@ public class JacksonUtil {
 			try {
 				getInstance();
 				jsonNode = instance.mapper.readTree(jsonStr);
-			} catch (Exception e) {
+			} catch (JsonProcessingException e) {
 				logger.error("", e);
 			}
 			return jsonNode;
@@ -182,7 +183,7 @@ public class JacksonUtil {
 			try {
 				getInstance();
 				list = instance.mapper.readValue(jsonArrStr, List.class);
-			} catch (Exception e) {
+			} catch (JsonProcessingException e) {
 				logger.error("", e);
 			}
 			return list;
@@ -198,7 +199,7 @@ public class JacksonUtil {
 			try {
 				getInstance();
 				arrayNode = (ArrayNode) instance.mapper.readTree(jsonArrStr);
-			} catch (Exception e) {
+			} catch (JsonProcessingException e) {
 				logger.error("", e);
 			}
 			return arrayNode;
@@ -217,7 +218,7 @@ public class JacksonUtil {
 				getInstance();
 				Object result = instance.mapper.readValue(jsonStr, clazz);
 				return clazz.cast(result);
-			} catch (Exception e) {
+			} catch (JsonProcessingException e) {
 				logger.error("", e);
 			}
 			return null;
@@ -270,7 +271,6 @@ public class JacksonUtil {
 
 		    return obj;
 		}
-
 	}
 
 }
