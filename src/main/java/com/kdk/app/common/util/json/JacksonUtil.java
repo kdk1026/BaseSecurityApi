@@ -23,7 +23,8 @@ import com.kdk.app.common.ExceptionMessage;
  * -----------------------------------
  * 개정이력
  * -----------------------------------
- * 2025. 5. 21. kdk	정리
+ * 2025. 5. 21. kdk		정리
+ * 2025. 5. 27. 김대광	제미나이에 의한 일부 코드 개선 (ObjectMapper static final로 처리)
  * </pre>
  *
  * 큰 파일 파싱에 유리
@@ -37,14 +38,13 @@ public class JacksonUtil {
 	}
 
 	private static JacksonUtil instance;
-    private ObjectMapper mapper;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
 	private static final Logger logger = LoggerFactory.getLogger(JacksonUtil.class);
 
 	private static synchronized JacksonUtil getInstance() {
         if (instance == null) {
 			instance = new JacksonUtil();
-			instance.mapper = new ObjectMapper();
         }
 
         return instance;
@@ -65,9 +65,9 @@ public class JacksonUtil {
 			try {
 				getInstance();
 				if (!isPretty) {
-					jsonStr = instance.mapper.writeValueAsString(obj);
+					jsonStr = MAPPER.writeValueAsString(obj);
 				} else {
-					jsonStr = instance.mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+					jsonStr = MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
 				}
 			} catch (JsonProcessingException e) {
 				logger.error("", e);
@@ -85,9 +85,9 @@ public class JacksonUtil {
 			try {
 				getInstance();
 				if (!isPretty) {
-					jsonStr = instance.mapper.writeValueAsString(map);
+					jsonStr = MAPPER.writeValueAsString(map);
 				} else {
-					jsonStr = instance.mapper.writerWithDefaultPrettyPrinter().writeValueAsString(map);
+					jsonStr = MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(map);
 				}
 			} catch (JsonProcessingException e) {
 				logger.error("", e);
@@ -105,9 +105,9 @@ public class JacksonUtil {
 			try {
 				getInstance();
 				if (!isPretty) {
-					jsonStr = instance.mapper.writeValueAsString(list);
+					jsonStr = MAPPER.writeValueAsString(list);
 				} else {
-					jsonStr = instance.mapper.writerWithDefaultPrettyPrinter().writeValueAsString(list);
+					jsonStr = MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(list);
 				}
 			} catch (JsonProcessingException e) {
 				logger.error("", e);
@@ -121,7 +121,7 @@ public class JacksonUtil {
 			}
 
 			getInstance();
-			return instance.mapper.valueToTree(map);
+			return MAPPER.valueToTree(map);
 		}
 
 		public static JsonNode converterListToJsonNode(List<?> list) {
@@ -130,7 +130,7 @@ public class JacksonUtil {
 			}
 
 			getInstance();
-			return instance.mapper.valueToTree(list);
+			return MAPPER.valueToTree(list);
 		}
 	}
 
@@ -149,8 +149,8 @@ public class JacksonUtil {
 
 			try {
 				getInstance();
-				map = instance.mapper.readValue(jsonStr, Map.class);
-			} catch (JsonProcessingException e) {
+				map = MAPPER.readValue(jsonStr, Map.class);
+			} catch (IOException e) {
 				logger.error("", e);
 			}
 			return map;
@@ -165,8 +165,8 @@ public class JacksonUtil {
 
 			try {
 				getInstance();
-				jsonNode = instance.mapper.readTree(jsonStr);
-			} catch (JsonProcessingException e) {
+				jsonNode = MAPPER.readTree(jsonStr);
+			} catch (IOException e) {
 				logger.error("", e);
 			}
 			return jsonNode;
@@ -182,8 +182,8 @@ public class JacksonUtil {
 
 			try {
 				getInstance();
-				list = instance.mapper.readValue(jsonArrStr, List.class);
-			} catch (JsonProcessingException e) {
+				list = MAPPER.readValue(jsonArrStr, List.class);
+			} catch (IOException e) {
 				logger.error("", e);
 			}
 			return list;
@@ -198,8 +198,8 @@ public class JacksonUtil {
 
 			try {
 				getInstance();
-				arrayNode = (ArrayNode) instance.mapper.readTree(jsonArrStr);
-			} catch (JsonProcessingException e) {
+				arrayNode = (ArrayNode) MAPPER.readTree(jsonArrStr);
+			} catch (IOException e) {
 				logger.error("", e);
 			}
 			return arrayNode;
@@ -216,9 +216,9 @@ public class JacksonUtil {
 
 			try {
 				getInstance();
-				Object result = instance.mapper.readValue(jsonStr, clazz);
+				Object result = MAPPER.readValue(jsonStr, clazz);
 				return clazz.cast(result);
-			} catch (JsonProcessingException e) {
+			} catch (IOException e) {
 				logger.error("", e);
 			}
 			return null;
@@ -243,7 +243,7 @@ public class JacksonUtil {
 
 		    try {
 		    	getInstance();
-		        obj = instance.mapper.readValue(new File(sfileName), typeReference);
+		        obj = MAPPER.readValue(new File(sfileName), typeReference);
 		    } catch (IOException e) {
 		        logger.error("Error reading JSON file", e);
 		    }
@@ -264,7 +264,7 @@ public class JacksonUtil {
 
 		    try {
 		    	getInstance();
-		        obj = instance.mapper.readValue(new File(sfileName), typeReference);
+		        obj = MAPPER.readValue(new File(sfileName), typeReference);
 		    } catch (IOException e) {
 		        logger.error("Error reading JSON file", e);
 		    }
