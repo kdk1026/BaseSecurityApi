@@ -28,15 +28,6 @@ public class SpringCookieUtil {
 	private SpringCookieUtil() {
 		super();
 	}
-
-	private static class LazyHolder {
-		private static final SpringCookieUtil INSTANCE = new SpringCookieUtil();
-	}
-
-	public static SpringCookieUtil getInstance() {
-		return LazyHolder.INSTANCE;
-	}
-
 	/**
 	 * Spring 쿠키 설정
 	 * @param response
@@ -47,7 +38,7 @@ public class SpringCookieUtil {
 	 * @param isHttpOnly
 	 * @param domain
 	 */
-	public void addCookie(HttpServletResponse response, String name, String value, int maxAge, boolean isSecure, boolean isHttpOnly, String domain) {
+	public static void addCookie(HttpServletResponse response, String name, String value, int maxAge, boolean isSecure, boolean isHttpOnly, String domain) {
 		if ( response == null ) {
 			throw new IllegalArgumentException(ExceptionMessage.isNull("response"));
 		}

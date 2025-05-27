@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
  * 개정이력
  * -----------------------------------
  * 2024. 10. 20. 김대광	최초작성
+ * 2025. 5. 27. 김대광	유틸은 Singleton 패턴을 사용하지 않는 것이 좋다는 의견 반영, 제미나이에 의한 일부 코드 개선
  * </pre>
  *
  *
@@ -20,23 +21,13 @@ import org.slf4j.LoggerFactory;
  */
 public class FileMimeTypeUtil {
 
+	private static final Logger logger = LoggerFactory.getLogger(FileMimeTypeUtil.class);
+
 	private FileMimeTypeUtil() {
 		super();
 	}
 
-	private static final Logger logger = LoggerFactory.getLogger(FileMimeTypeUtil.class);
-
-	private static FileMimeTypeUtil instance;
-
-	public static synchronized FileMimeTypeUtil getInstance() {
-        if (instance == null) {
-			instance = new FileMimeTypeUtil();
-        }
-
-        return instance;
-    }
-
-	public String getFileMimeTypeTika(InputStream is) {
+	public static String getFileMimeTypeTika(InputStream is) {
 		String mimeType = "";
 		Tika tika = new Tika();
 

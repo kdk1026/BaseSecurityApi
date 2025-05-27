@@ -40,28 +40,18 @@ import com.kdk.app.common.ExceptionMessage;
  */
 public class AesCryptoUtil {
 
+	private static final Logger logger = LoggerFactory.getLogger(AesCryptoUtil.class);
+
 	private AesCryptoUtil() {
 		super();
 	}
-
-	private final Logger logger = LoggerFactory.getLogger(AesCryptoUtil.class);
-
-	private static AesCryptoUtil instance;
-
-	public static synchronized AesCryptoUtil getInstance() {
-        if (instance == null) {
-			instance = new AesCryptoUtil();
-        }
-
-        return instance;
-    }
 
 	private static final String CHARSET = StandardCharsets.UTF_8.toString();
 
 	public static final String AES_CBC_PKCS5PADDING ="AES/CBC/PKCS5Padding";
 	public static final String AES_ECB_PKCS5PADDING ="AES/ECB/PKCS5Padding";
 
-	public String encrypt(String key, String iv, String padding, String plainText) {
+	public static String encrypt(String key, String iv, String padding, String plainText) {
 		if ( StringUtils.isBlank(key) ) {
 			throw new IllegalArgumentException(ExceptionMessage.isNull("key"));
 		}
@@ -104,7 +94,7 @@ public class AesCryptoUtil {
 		return sEncryptText;
 	}
 
-	public String decrypt(String key, String iv, String padding, String encryptText) {
+	public static String decrypt(String key, String iv, String padding, String encryptText) {
 		if ( StringUtils.isBlank(key) ) {
 			throw new IllegalArgumentException(ExceptionMessage.isNull("key"));
 		}
