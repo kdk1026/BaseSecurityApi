@@ -221,12 +221,10 @@ public class RestTemplateUtil {
 					List<Object> list = (List<Object>) value;
 					mMap.put(sKey, list);
 
-				} else if ( value instanceof File ) {
-					File file = (File) value;
+				} else if ( value instanceof File file ) {
 					mMap.add(sKey, new FileSystemResource(file));
 
-				} else if ( value instanceof MultipartFile ) {
-					MultipartFile mFile = (MultipartFile) value;
+				} else if ( value instanceof MultipartFile mFile ) {
 					mMap.add(sKey, new ByteArrayResource(mFile.getBytes()) {
 
 						@Override
