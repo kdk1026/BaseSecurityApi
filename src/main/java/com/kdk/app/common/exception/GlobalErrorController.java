@@ -22,20 +22,17 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @ControllerAdvice
 public class GlobalErrorController {
 
-//	@Value("${front.url}")
-//	private String frontUrl;
-
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NoHandlerFoundException.class)
     public String handleNotFound(NoHandlerFoundException ex, Model model) {
-//    	model.addAttribute("frontUrl", frontUrl);
+    	// XXX `홈`, `되돌아가기` 버튼 액션을 위해, frontUrl 을 넘겨준다.
         return "error/404";
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(NoResourceFoundException.class)
     public String handleNoResourceFound(NoResourceFoundException ex, Model model) {
-//    	model.addAttribute("frontUrl", frontUrl);
+    	// XXX `홈`, `되돌아가기` 버튼 액션을 위해, frontUrl 을 넘겨준다.
         return "error/404";
     }
 
