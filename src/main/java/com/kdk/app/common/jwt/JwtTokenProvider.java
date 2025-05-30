@@ -14,6 +14,7 @@ import com.google.gson.GsonBuilder;
 import com.kdk.app.common.CommonConstants;
 import com.kdk.app.common.component.SpringBootProperty;
 import com.kdk.app.common.util.crypto.AesCryptoUtil;
+import com.kdk.app.common.util.crypto.AesCryptoUtil.EncryptResult;
 import com.kdk.app.common.util.json.GsonUtil;
 import com.kdk.app.login.vo.UserVo;
 
@@ -49,6 +50,9 @@ public class JwtTokenProvider {
 		this.springBootProperty = springBootProperty;
 	}
 
+	private static final String JWT_SECRET_KEY = "jwt.secret.key";
+	private static final String CRYPTO_AES_KEY = "crypto.aes.key";
+
 // ------------------------------------------------------------------------
 // 토큰 생성
 // ------------------------------------------------------------------------
@@ -57,12 +61,12 @@ public class JwtTokenProvider {
 	 * @param user
 	 * @return
 	 */
-	public String generateAccessToken(UserVo user) {
+	public JwtTokenVo generateAccessToken(UserVo user) {
 		String sExpireTime = springBootProperty.getProperty("jwt.access.expire.minute");
 		String sSubject = springBootProperty.getProperty("jwt.subject");
 		String sIssuer = springBootProperty.getProperty("jwt.issuer");
 
-		String sSecretKey = springBootProperty.getProperty("jwt.secret.key");
+		String sSecretKey = springBootProperty.getProperty(JWT_SECRET_KEY);
 		SecretKey key = Keys.hmacShaKeyFor(sSecretKey.getBytes());
 
 		JwtBuilder builder = Jwts.builder();
@@ -78,14 +82,19 @@ public class JwtTokenProvider {
 
 		String sUserJson = GsonUtil.ToJson.converterObjToJsonStr(user, false);
 
-		String sKey = springBootProperty.getProperty("crypto.aes.key");
-		String sIv = springBootProperty.getProperty("crypto.aes.iv");
-		String sEncryptUserJson = AesCryptoUtil.encrypt(sKey, sIv, AesCryptoUtil.AES_CBC_PKCS5PADDING, sUserJson);
+		String sKey = springBootProperty.getProperty(CRYPTO_AES_KEY);
+
+		EncryptResult encryptResult = AesCryptoUtil.encrypt(sKey, AesCryptoUtil.AES_CBC_PKCS5PADDING, sUserJson);
+		String sEncryptUserJson = encryptResult.getEncryptedText();
 
 		builder.claim(CommonConstants.Jwt.USER_INFO, sEncryptUserJson);
 		builder.claim(CommonConstants.Jwt.TOKEN_KIND, CommonConstants.Jwt.ACCESS_TOKEN);
+		builder.claim("iv", encryptResult.getIv());
 
-		return builder.compact();
+		JwtTokenVo jwtTokenVo = new JwtTokenVo();
+		jwtTokenVo.setAccessToken(builder.compact());
+		jwtTokenVo.setAccessTokenIv(encryptResult.getIv());
+		return jwtTokenVo;
 	}
 
 	/**
@@ -93,12 +102,12 @@ public class JwtTokenProvider {
 	 * @param user
 	 * @return
 	 */
-	public String generateRefreshToken(UserVo user) {
+	public JwtTokenVo generateRefreshToken(UserVo user) {
 		String sExpireTime = springBootProperty.getProperty("jwt.refresh.expire.minute");
 		String sSubject = springBootProperty.getProperty("jwt.subject");
 		String sIssuer = springBootProperty.getProperty("jwt.issuer");
 
-		String sSecretKey = springBootProperty.getProperty("jwt.secret.key");
+		String sSecretKey = springBootProperty.getProperty(JWT_SECRET_KEY);
 		SecretKey key = Keys.hmacShaKeyFor(sSecretKey.getBytes());
 
 		JwtBuilder builder = Jwts.builder();
@@ -115,13 +124,18 @@ public class JwtTokenProvider {
 		String sUserJson = GsonUtil.ToJson.converterObjToJsonStr(user, false);
 
 		String sKey = springBootProperty.getProperty("crypto.aes.key");
-		String sIv = springBootProperty.getProperty("crypto.aes.iv");
-		String sEncryptUserJson = AesCryptoUtil.encrypt(sKey, sIv, AesCryptoUtil.AES_CBC_PKCS5PADDING, sUserJson);
+
+		EncryptResult encryptResult = AesCryptoUtil.encrypt(sKey, AesCryptoUtil.AES_CBC_PKCS5PADDING, sUserJson);
+		String sEncryptUserJson = encryptResult.getEncryptedText();
 
 		builder.claim(CommonConstants.Jwt.USER_INFO, sEncryptUserJson);
 		builder.claim(CommonConstants.Jwt.TOKEN_KIND, CommonConstants.Jwt.REFRESH_TOKEN);
+		builder.claim("iv", encryptResult.getIv());
 
-		return builder.compact();
+		JwtTokenVo jwtTokenVo = new JwtTokenVo();
+		jwtTokenVo.setRefreshToken(builder.compact());
+		jwtTokenVo.setAccessTokenIv(encryptResult.getIv());
+		return jwtTokenVo;
 	}
 
 	/**
@@ -182,7 +196,7 @@ public class JwtTokenProvider {
 	 * @return (0: false, 1: true, 2: expired)
 	 */
 	public int isValidateJwtToken(String token) {
-		String sSecretKey = springBootProperty.getProperty("jwt.secret.key");
+		String sSecretKey = springBootProperty.getProperty(JWT_SECRET_KEY);
 		SecretKey key = Keys.hmacShaKeyFor(sSecretKey.getBytes());
 
 		try {
@@ -215,7 +229,7 @@ public class JwtTokenProvider {
 	 * @return
 	 */
 	public Date getExpirationFromJwt(String token) {
-		String sSecretKey = springBootProperty.getProperty("jwt.secret.key");
+		String sSecretKey = springBootProperty.getProperty(JWT_SECRET_KEY);
 		SecretKey key = Keys.hmacShaKeyFor(sSecretKey.getBytes());
 
 		Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
@@ -229,7 +243,7 @@ public class JwtTokenProvider {
 	 * @return
 	 */
 	public String getTokenKind(String token) {
-		String sSecretKey = springBootProperty.getProperty("jwt.secret.key");
+		String sSecretKey = springBootProperty.getProperty(JWT_SECRET_KEY);
 		SecretKey key = Keys.hmacShaKeyFor(sSecretKey.getBytes());
 
 		Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
@@ -249,15 +263,15 @@ public class JwtTokenProvider {
 		UserVo user = null;
 
 		if ( !StringUtils.isEmpty(token) ) {
-			String sSecretKey = springBootProperty.getProperty("jwt.secret.key");
+			String sSecretKey = springBootProperty.getProperty(JWT_SECRET_KEY);
 			SecretKey key = Keys.hmacShaKeyFor(sSecretKey.getBytes());
 
 			Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
 
 			String sKey = springBootProperty.getProperty("crypto.aes.key");
-			String sIv = springBootProperty.getProperty("crypto.aes.iv");
 			String sEncryptUserJson = String.valueOf(claims.get(CommonConstants.Jwt.USER_INFO));
 
+			String sIv = String.valueOf(claims.get("iv"));
 			String sUserJson = AesCryptoUtil.decrypt(sKey, sIv, AesCryptoUtil.AES_CBC_PKCS5PADDING, sEncryptUserJson);
 
 			Gson gson = new GsonBuilder().disableHtmlEscaping().create();

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.kdk.app.common.CommonConstants;
 import com.kdk.app.common.component.SpringBootProperty;
 import com.kdk.app.common.jwt.JwtTokenProvider;
+import com.kdk.app.common.jwt.JwtTokenVo;
 import com.kdk.app.common.util.date.Jsr310DateUtil;
 import com.kdk.app.common.vo.ResponseCodeEnum;
 import com.kdk.app.login.service.RefreshTokenService;
@@ -88,7 +89,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
 		if ( nMinGap <= 0 ) {
 			// 조건 충족 시, Access 토큰 갱신
-			sNewAccessToken = jwtTokenProvider.generateAccessToken(userVo);
+			JwtTokenVo jwtTokenVo = jwtTokenProvider.generateAccessToken(userVo);
+			sNewAccessToken = jwtTokenVo.getAccessToken();
 		} else {
 			sNewAccessToken = refreshTokenParamVo.getAccessToken();
 		}
@@ -111,7 +113,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
 		if ( nRefreshMinGap <= 60 ) {
 			// 조건 충족 시, Refresh 토큰 갱신
-			String sNewRefreshToken = jwtTokenProvider.generateRefreshToken(userVo);
+			JwtTokenVo jwtTokenVo = jwtTokenProvider.generateRefreshToken(userVo);
+			String sNewRefreshToken = jwtTokenVo.getRefreshToken();
 
 			//--------------------------------------------------
 			// Refresh 토큰 응답 설정

@@ -1,10 +1,10 @@
 package com.kdk.app.common.util.spring;
 
+import java.util.Objects;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.StringUtils;
-
-import com.kdk.app.common.ExceptionMessage;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -39,17 +39,9 @@ public class SpringCookieUtil {
 	 * @param domain
 	 */
 	public static void addCookie(HttpServletResponse response, String name, String value, int maxAge, boolean isSecure, boolean isHttpOnly, String domain) {
-		if ( response == null ) {
-			throw new IllegalArgumentException(ExceptionMessage.isNull("response"));
-		}
-
-		if ( !StringUtils.hasText(name) ) {
-			throw new IllegalArgumentException(ExceptionMessage.isNull("name"));
-		}
-
-		if ( !StringUtils.hasText(value) ) {
-			throw new IllegalArgumentException(ExceptionMessage.isNull("value"));
-		}
+		Objects.requireNonNull(response, "response must not be null");
+		Objects.requireNonNull(name.trim(), "name must not be null");
+		Objects.requireNonNull(value.trim(), "value must not be null");
 
 		ResponseCookie cookie = ResponseCookie.from(value, value)
 				.path("/")

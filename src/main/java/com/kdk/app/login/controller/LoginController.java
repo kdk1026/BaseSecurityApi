@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kdk.app.common.component.SpringBootProperty;
 import com.kdk.app.common.jwt.JwtTokenProvider;
+import com.kdk.app.common.jwt.JwtTokenVo;
 import com.kdk.app.common.vo.ResponseCodeEnum;
 import com.kdk.app.login.service.LoginService;
 import com.kdk.app.login.vo.LoginParamVo;
@@ -76,14 +77,17 @@ public class LoginController {
 
 		JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(springBootProperty);
 
-		String sToken = jwtTokenProvider.generateAccessToken(userVo);
+		JwtTokenVo jwtTokenVo = jwtTokenProvider.generateAccessToken(userVo);
+
+		String sToken = jwtTokenVo.getAccessToken();
 		loginResVo.setAccessToken(sToken);
 
 		String sAccessTokenExpireMin = springBootProperty.getProperty("jwt.access.expire.minute");
 		int nAccessTokenExpireMin = Integer.parseInt(sAccessTokenExpireMin);
 		loginResVo.setAccessTokenExpireSecond(nAccessTokenExpireMin * 60);
 
-		String sRefreshToken = jwtTokenProvider.generateRefreshToken(userVo);
+		jwtTokenVo = jwtTokenProvider.generateRefreshToken(userVo);
+		String sRefreshToken = jwtTokenVo.getRefreshToken();
 		loginResVo.setRefreshToken(sRefreshToken);
 
 		String sRefreshTokenExpireMin = springBootProperty.getProperty("jwt.refresh.expire.minute");

@@ -2,6 +2,7 @@ package com.kdk.app.common.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 import org.apache.tika.Tika;
 import org.slf4j.Logger;
@@ -28,6 +29,8 @@ public class FileMimeTypeUtil {
 	}
 
 	public static String getFileMimeTypeTika(InputStream is) {
+		Objects.requireNonNull(is, "InputStream must not be null");
+
 		String mimeType = "";
 		Tika tika = new Tika();
 

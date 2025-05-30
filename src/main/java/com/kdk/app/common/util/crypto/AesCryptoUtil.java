@@ -5,7 +5,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Objects;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -15,7 +17,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,24 +52,17 @@ public class AesCryptoUtil {
 	public static final String AES_CBC_PKCS5PADDING ="AES/CBC/PKCS5Padding";
 	public static final String AES_ECB_PKCS5PADDING ="AES/ECB/PKCS5Padding";
 
-	public static String encrypt(String key, String iv, String padding, String plainText) {
-		if ( StringUtils.isBlank(key) ) {
+	public static EncryptResult encrypt(String key, String padding, String plainText) {
+		Objects.requireNonNull(key, "key must not be null");
+		Objects.requireNonNull(padding, "padding must not be null");
+		Objects.requireNonNull(plainText, "plainText must not be null");
+
+		if ( key.length() != 16 && key.length() != 24 && key.length() != 32 ) {
 			throw new IllegalArgumentException(ExceptionMessage.isNull("key"));
 		}
 
-		if ( StringUtils.isBlank(iv) ) {
-			throw new IllegalArgumentException(ExceptionMessage.isNull("iv"));
-		}
-
-		if ( StringUtils.isBlank(padding) ) {
-			throw new IllegalArgumentException(ExceptionMessage.isNull("padding"));
-		}
-
-		if ( StringUtils.isBlank(plainText) ) {
-			throw new IllegalArgumentException(ExceptionMessage.isNull("plainText"));
-		}
-
-		String sEncryptText = "";
+		String encryptedText = "";
+		String generatedIvString = null;
 
 		try {
 			SecretKey secretKey = new SecretKeySpec(key.getBytes(CHARSET), "AES");
@@ -76,64 +70,84 @@ public class AesCryptoUtil {
 			Cipher cipher = Cipher.getInstance(padding);
 
 			if ( padding.indexOf("CBC") > -1 ) {
+				SecureRandom secureRandom = new SecureRandom();
+                byte[] ivBytes = new byte[16];
+                secureRandom.nextBytes(ivBytes);
+
 				// CBC의 경우, IvParameterSpec 생략 가능
-				cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(iv.getBytes(CHARSET)));
+				cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(ivBytes));
+
+				generatedIvString = Base64.getEncoder().encodeToString(ivBytes);
 			} else {
 				// ECB의 경우, IvParameterSpec 사용 불가
 				cipher.init(Cipher.ENCRYPT_MODE, secretKey);
 			}
 
-			byte[] textBytes = cipher.doFinal(plainText.getBytes(CHARSET));
-			sEncryptText = Base64.getEncoder().encodeToString(textBytes);
+			byte[] encryptedBytes = cipher.doFinal(plainText.getBytes(CHARSET));
+			encryptedText = Base64.getEncoder().encodeToString(encryptedBytes);
 
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException |
                 InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException |
                 UnsupportedEncodingException | IllegalArgumentException e) {
         	logger.error("", e);
         }
-		return sEncryptText;
+		return new EncryptResult(encryptedText, generatedIvString);
 	}
 
-	public static String decrypt(String key, String iv, String padding, String encryptText) {
-		if ( StringUtils.isBlank(key) ) {
+	public static String decrypt(String key, String iv, String padding, String encryptedText) {
+		Objects.requireNonNull(key, "key must not be null");
+		Objects.requireNonNull(padding, "padding must not be null");
+		Objects.requireNonNull(encryptedText, "encryptedText must not be null");
+
+		if ( key.length() != 16 && key.length() != 24 && key.length() != 32 ) {
 			throw new IllegalArgumentException(ExceptionMessage.isNull("key"));
 		}
 
-		if ( StringUtils.isBlank(iv) ) {
-			throw new IllegalArgumentException(ExceptionMessage.isNull("iv"));
-		}
-
-		if ( StringUtils.isBlank(padding) ) {
-			throw new IllegalArgumentException(ExceptionMessage.isNull("padding"));
-		}
-
-		if ( StringUtils.isBlank(encryptText) ) {
-			throw new IllegalArgumentException(ExceptionMessage.isNull("encryptText"));
-		}
-
-		String sDecryptText = "";
+		String decryptedText = "";
 		try {
 			SecretKey secretKey = new SecretKeySpec(key.getBytes(CHARSET), "AES");
 
 			Cipher cipher = Cipher.getInstance(padding);
 
 			if ( padding.indexOf("CBC") > -1 ) {
+				Objects.requireNonNull(iv, "iv must not be null for CBC mode");
+
+				byte[] ivBytes = Base64.getDecoder().decode(iv);
+
 				// CBC의 경우, IvParameterSpec 생략 가능
-				cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv.getBytes(CHARSET)));
+				cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(ivBytes));
 			} else {
 				// ECB의 경우, IvParameterSpec 사용 불가
 				cipher.init(Cipher.DECRYPT_MODE, secretKey);
 			}
 
-			byte[] textBytes = Base64.getDecoder().decode(encryptText);
-			sDecryptText = new String(cipher.doFinal(textBytes), CHARSET);
+			byte[] textBytes = Base64.getDecoder().decode(encryptedText);
+			decryptedText = new String(cipher.doFinal(textBytes), CHARSET);
 
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException |
                 InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException |
                 UnsupportedEncodingException | IllegalArgumentException e) {
         	logger.error("", e);
         }
-		return sDecryptText;
+		return decryptedText;
 	}
+
+	public static class EncryptResult {
+        private String encryptedText;
+        private String iv; // Base64 인코딩된 IV 문자열
+
+        public EncryptResult(String encryptedText, String iv) {
+            this.encryptedText = encryptedText;
+            this.iv = iv;
+        }
+
+        public String getEncryptedText() {
+            return encryptedText;
+        }
+
+        public String getIv() {
+            return iv;
+        }
+    }
 
 }
