@@ -20,27 +20,35 @@ import com.kdk.app.login.vo.UserVo;
 @Service
 public class LoginService {
 
+	private static final String MEMBER_USER = "user";
+	private static final String MEMBER_MANAGER = "manager";
+	private static final String MEMBER_ADMIN = "admin";
+
+	private static final String BCRYPT_PASSWORD = "$2a$10$SHHHWnin79imcnL7c9VEBO5TRaBeaB11wVFYJ6CCSlIjBIaM/89Sy";
+
+	private static final String ROLE_USER = "ROLE_USER";
+
 	public UserVo findByUsername(String username) {
 		UserVo vo = null;
 
-		if ( "user".equals(username) ) {
+		if ( MEMBER_USER.equals(username) ) {
 			vo = new UserVo();
-			vo.setUsername("user");
-			vo.setPassword("$2a$10$SHHHWnin79imcnL7c9VEBO5TRaBeaB11wVFYJ6CCSlIjBIaM/89Sy");
+			vo.setUsername(MEMBER_USER);
+			vo.setPassword(BCRYPT_PASSWORD);
 			vo.setUseYn("Y");
 		}
 
-		if ( "manager".equals(username) ) {
+		if ( MEMBER_MANAGER.equals(username) ) {
 			vo = new UserVo();
-			vo.setUsername("manager");
-			vo.setPassword("$2a$10$SHHHWnin79imcnL7c9VEBO5TRaBeaB11wVFYJ6CCSlIjBIaM/89Sy");
+			vo.setUsername(MEMBER_MANAGER);
+			vo.setPassword(BCRYPT_PASSWORD);
 			vo.setUseYn("Y");
 		}
 
-		if ( "admin".equals(username) ) {
+		if ( MEMBER_ADMIN.equals(username) ) {
 			vo = new UserVo();
-			vo.setUsername("admin");
-			vo.setPassword("$2a$10$SHHHWnin79imcnL7c9VEBO5TRaBeaB11wVFYJ6CCSlIjBIaM/89Sy");
+			vo.setUsername(MEMBER_ADMIN);
+			vo.setPassword(BCRYPT_PASSWORD);
 			vo.setUseYn("Y");
 		}
 
@@ -50,17 +58,17 @@ public class LoginService {
 	public List<String> findAuthoritiesByUsername(String username) {
 		List<String> authorities = new ArrayList<>();
 
-		if ( "user".equals(username) ) {
-			authorities.add("ROLE_USER");
+		if ( MEMBER_USER.equals(username) ) {
+			authorities.add(ROLE_USER);
 		}
 
-		if ( "manager".equals(username) ) {
-			authorities.add("ROLE_USER");
+		if ( MEMBER_MANAGER.equals(username) ) {
+			authorities.add(ROLE_USER);
 			authorities.add("ROLE_MANAGER");
 		}
 
-		if ( "admin".equals(username) ) {
-			authorities.add("ROLE_USER");
+		if ( MEMBER_ADMIN.equals(username) ) {
+			authorities.add(ROLE_USER);
 			authorities.add("ROLE_MANAGER");
 			authorities.add("ROLE_ADMIN");
 		}

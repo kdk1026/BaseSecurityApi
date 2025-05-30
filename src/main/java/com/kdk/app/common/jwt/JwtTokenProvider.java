@@ -123,7 +123,7 @@ public class JwtTokenProvider {
 
 		String sUserJson = GsonUtil.ToJson.converterObjToJsonStr(user, false);
 
-		String sKey = springBootProperty.getProperty("crypto.aes.key");
+		String sKey = springBootProperty.getProperty(CRYPTO_AES_KEY);
 
 		EncryptResult encryptResult = AesCryptoUtil.encrypt(sKey, AesCryptoUtil.AES_CBC_PKCS5PADDING, sUserJson);
 		String sEncryptUserJson = encryptResult.getEncryptedText();
@@ -268,7 +268,7 @@ public class JwtTokenProvider {
 
 			Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
 
-			String sKey = springBootProperty.getProperty("crypto.aes.key");
+			String sKey = springBootProperty.getProperty(CRYPTO_AES_KEY);
 			String sEncryptUserJson = String.valueOf(claims.get(CommonConstants.Jwt.USER_INFO));
 
 			String sIv = String.valueOf(claims.get("iv"));
