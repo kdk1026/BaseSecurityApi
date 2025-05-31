@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,8 +41,14 @@ public class SpringCookieUtil {
 	 */
 	public static void addCookie(HttpServletResponse response, String name, String value, int maxAge, boolean isSecure, boolean isHttpOnly, String domain) {
 		Objects.requireNonNull(response, "response must not be null");
-		Objects.requireNonNull(name.trim(), "name must not be null");
-		Objects.requireNonNull(value.trim(), "value must not be null");
+
+		if ( ObjectUtils.isEmpty(name.trim()) ) {
+			throw new IllegalArgumentException("name must not be null");
+		}
+
+		if ( ObjectUtils.isEmpty(value.trim()) ) {
+			throw new IllegalArgumentException("value must not be null");
+		}
 
 		ResponseCookie cookie = ResponseCookie.from(value, value)
 				.path("/")

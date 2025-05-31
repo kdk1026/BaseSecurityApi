@@ -137,11 +137,23 @@ public class JacksonUtil {
 			super();
 		}
 
-		private static final String JSON_STR_NULL = ExceptionMessage.isNull("jsonStr");
+		private static void validateJsonString(String jsonStr) {
+			Objects.requireNonNull(jsonStr, ExceptionMessage.isNull("jsonStr"));
+			if (jsonStr.trim().isEmpty()) {
+				throw new IllegalArgumentException(ExceptionMessage.isNull("jsonStr"));
+			}
+		}
+
+		private static void validateJsonArrayString(String jsonArrayStr) {
+			Objects.requireNonNull(jsonArrayStr, ExceptionMessage.isNull("jsonArrayStr"));
+			if (jsonArrayStr.trim().isEmpty()) {
+				throw new IllegalArgumentException(ExceptionMessage.isNull("jsonArrayStr"));
+			}
+		}
 
 		@SuppressWarnings("unchecked")
 		public static Map<String, Object> converterJsonStrToMap(String jsonStr) {
-			Objects.requireNonNull(jsonStr, JSON_STR_NULL);
+			validateJsonString(jsonStr);
 
 			Map<String, Object> map = new HashMap<>();
 
@@ -155,7 +167,7 @@ public class JacksonUtil {
 		}
 
 		public static JsonNode converterJsonStrToJsonNode(String jsonStr) {
-			Objects.requireNonNull(jsonStr, JSON_STR_NULL);
+			validateJsonString(jsonStr);
 
 			JsonNode jsonNode = null;
 
@@ -170,7 +182,7 @@ public class JacksonUtil {
 
 		@SuppressWarnings("unchecked")
 		public static <T> List<T> converterJsonStrToList(String jsonArrStr) {
-			Objects.requireNonNull(jsonArrStr, ExceptionMessage.isNull("jsonArrStr"));
+			validateJsonArrayString(jsonArrStr);
 
 			List<T> list = new ArrayList<>();
 
@@ -184,7 +196,7 @@ public class JacksonUtil {
 		}
 
 		public static ArrayNode converterJsonStrToArayNode(String jsonArrStr) {
-			Objects.requireNonNull(jsonArrStr, ExceptionMessage.isNull("jsonArrStr"));
+			validateJsonArrayString(jsonArrStr);
 
 			ArrayNode arrayNode = null;
 
@@ -198,7 +210,8 @@ public class JacksonUtil {
 		}
 
 		public static <T> T converterJsonStrToClass(String jsonStr, Class<T> clazz) {
-			Objects.requireNonNull(jsonStr, ExceptionMessage.isNull("jsonStr"));
+			validateJsonString(jsonStr);
+
 			Objects.requireNonNull(clazz, ExceptionMessage.isNull("clazz"));
 
 			try {
@@ -217,8 +230,16 @@ public class JacksonUtil {
 			super();
 		}
 
+		private static void validateFileName(String fileName) {
+			Objects.requireNonNull(fileName, ExceptionMessage.isNull("fileName"));
+			if (fileName.trim().isEmpty()) {
+				throw new IllegalArgumentException(ExceptionMessage.isNull("fileName"));
+			}
+		}
+
 		public static Object readJsonFileObject(String sfileName, TypeReference<?> typeReference) {
-			Objects.requireNonNull(sfileName, ExceptionMessage.isNull("sfileName"));
+			validateFileName(sfileName);
+
 			Objects.requireNonNull(typeReference, ExceptionMessage.isNull("typeReference"));
 
 		    Object obj = null;
@@ -234,7 +255,8 @@ public class JacksonUtil {
 		}
 
 		public static <T> List<T> readJsonFileArray(String sfileName, TypeReference<List<T>> typeReference) {
-			Objects.requireNonNull(sfileName, ExceptionMessage.isNull("sfileName"));
+			validateFileName(sfileName);
+
 			Objects.requireNonNull(typeReference, ExceptionMessage.isNull("typeReference"));
 
 		    List<T> obj = null;

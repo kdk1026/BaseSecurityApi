@@ -41,8 +41,15 @@ public class CookieUtil {
 	 */
 	public static void addCookie(HttpServletResponse response, String name, String value, int expiry, boolean isSecure, boolean isUseJs, String domain) {
 		Objects.requireNonNull(response, RESPONSE_IS_NUL);
-		Objects.requireNonNull(name.trim(), ExceptionMessage.isNull("name"));
-        Objects.requireNonNull(value.trim(), ExceptionMessage.isNull("value"));
+		Objects.requireNonNull(name, ExceptionMessage.isNull("name"));
+		if (name.trim().isEmpty()) {
+			throw new IllegalArgumentException(ExceptionMessage.isNull("name"));
+		}
+
+        Objects.requireNonNull(value, ExceptionMessage.isNull("value"));
+        if (value.trim().isEmpty()) {
+			throw new IllegalArgumentException(ExceptionMessage.isNull("value"));
+		}
 
 		if ( expiry < 0 ) {
 			throw new IllegalArgumentException(ExceptionMessage.isNegative("expiry"));
@@ -73,7 +80,10 @@ public class CookieUtil {
 	 */
 	public static Cookie getCookie(HttpServletRequest request, String cookieName) {
 		Objects.requireNonNull(request, REQUEST_IS_NUL);
-		Objects.requireNonNull(cookieName.trim(), COOKIE_NAME_IS_NUL);
+		Objects.requireNonNull(cookieName, COOKIE_NAME_IS_NUL);
+		if (cookieName.trim().isEmpty()) {
+			throw new IllegalArgumentException(COOKIE_NAME_IS_NUL);
+		}
 
 		Cookie cookie = null;
 		Cookie[] cookies = request.getCookies();
@@ -98,7 +108,10 @@ public class CookieUtil {
 	 */
 	public static String getCookieValue(HttpServletRequest request, String cookieName) {
 		Objects.requireNonNull(request, REQUEST_IS_NUL);
-		Objects.requireNonNull(cookieName.trim(), COOKIE_NAME_IS_NUL);
+		Objects.requireNonNull(cookieName, COOKIE_NAME_IS_NUL);
+		if (cookieName.trim().isEmpty()) {
+			throw new IllegalArgumentException(COOKIE_NAME_IS_NUL);
+		}
 
 		Cookie cookie = getCookie(request, cookieName);
 		return (cookie != null) ? cookie.getValue() : "";
@@ -134,7 +147,10 @@ public class CookieUtil {
 	 */
 	public static void removeCookie(HttpServletResponse response, String cookieName, String domain) {
 		Objects.requireNonNull(response, RESPONSE_IS_NUL);
-		Objects.requireNonNull(cookieName.trim(), COOKIE_NAME_IS_NUL);
+		Objects.requireNonNull(cookieName, COOKIE_NAME_IS_NUL);
+		if (cookieName.trim().isEmpty()) {
+			throw new IllegalArgumentException(COOKIE_NAME_IS_NUL);
+		}
 
 		Cookie cookie = new Cookie(cookieName, null);
 		cookie.setPath("/");
@@ -162,7 +178,10 @@ public class CookieUtil {
 	 */
 	public static boolean isExist(HttpServletRequest request, String cookieName) {
 		Objects.requireNonNull(request, REQUEST_IS_NUL);
-		Objects.requireNonNull(cookieName.trim(), COOKIE_NAME_IS_NUL);
+		Objects.requireNonNull(cookieName, COOKIE_NAME_IS_NUL);
+		if (cookieName.trim().isEmpty()) {
+			throw new IllegalArgumentException(COOKIE_NAME_IS_NUL);
+		}
 
 		String cookieValue = getCookieValue(request, cookieName);
 		return !"".equals(cookieValue);
@@ -175,7 +194,10 @@ public class CookieUtil {
 	 */
 	public static int getCookieMaxAge(HttpServletRequest request, String cookieName) {
 		Objects.requireNonNull(request, REQUEST_IS_NUL);
-		Objects.requireNonNull(cookieName.trim(), COOKIE_NAME_IS_NUL);
+		Objects.requireNonNull(cookieName, COOKIE_NAME_IS_NUL);
+		if (cookieName.trim().isEmpty()) {
+			throw new IllegalArgumentException(COOKIE_NAME_IS_NUL);
+		}
 
 		Cookie cookie = getCookie(request, cookieName);
 		return (cookie != null) ? cookie.getMaxAge() : 0;

@@ -17,6 +17,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,9 +54,17 @@ public class AesCryptoUtil {
 	public static final String AES_ECB_PKCS5PADDING ="AES/ECB/PKCS5Padding";
 
 	public static EncryptResult encrypt(String key, String padding, String plainText) {
-		Objects.requireNonNull(key, "key must not be null");
-		Objects.requireNonNull(padding, "padding must not be null");
-		Objects.requireNonNull(plainText, "plainText must not be null");
+		if ( StringUtils.isBlank(key) ) {
+			throw new IllegalArgumentException("key must not be null");
+		}
+
+		if ( StringUtils.isBlank(padding) ) {
+			throw new IllegalArgumentException("padding must not be null");
+		}
+
+		if ( StringUtils.isBlank(plainText) ) {
+			throw new IllegalArgumentException("plainText must not be null");
+		}
 
 		if ( key.length() != 16 && key.length() != 24 && key.length() != 32 ) {
 			throw new IllegalArgumentException(ExceptionMessage.isNull("key"));
@@ -95,9 +104,17 @@ public class AesCryptoUtil {
 	}
 
 	public static String decrypt(String key, String iv, String padding, String encryptedText) {
-		Objects.requireNonNull(key, "key must not be null");
-		Objects.requireNonNull(padding, "padding must not be null");
-		Objects.requireNonNull(encryptedText, "encryptedText must not be null");
+		if ( StringUtils.isBlank(key) ) {
+			throw new IllegalArgumentException("key must not be null");
+		}
+
+		if ( StringUtils.isBlank(padding) ) {
+			throw new IllegalArgumentException("padding must not be null");
+		}
+
+		if ( StringUtils.isBlank(encryptedText) ) {
+			throw new IllegalArgumentException("encryptedText must not be null");
+		}
 
 		if ( key.length() != 16 && key.length() != 24 && key.length() != 32 ) {
 			throw new IllegalArgumentException(ExceptionMessage.isNull("key"));
