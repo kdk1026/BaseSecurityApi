@@ -118,7 +118,7 @@ public class RestTemplateUtil {
         		try {
 					httpClient = HttpClients.custom()
 							.setConnectionManager(HttpClientConnectionManagerProvider.createHttpClientConnectionManager(isSsl))
-							.setRetryStrategy(new DefaultHttpRequestRetryStrategy(3, TimeValue.ofSeconds(3)))
+							.setRetryStrategy(new DefaultHttpRequestRetryStrategy(1, TimeValue.ofSeconds(3)))
 							.build();
 				} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
 					logger.error("", e);
