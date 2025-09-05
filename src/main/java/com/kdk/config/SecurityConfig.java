@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.ContentTypeOptionsConfig;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -72,8 +73,10 @@ public class SecurityConfig {
 			.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 			.headers(headers ->
 				headers
+					.cacheControl(cache -> cache.disable())
+					.contentTypeOptions(ContentTypeOptionsConfig::disable)
 					.httpStrictTransportSecurity(this.hstsCustomizer())
-					.frameOptions(this.frameOptionsCustomizer())
+					.frameOptions(FrameOptionsConfig::deny)
 					.xssProtection(this.xssCustomizer())
 
 			)
@@ -112,12 +115,8 @@ public class SecurityConfig {
 				.maxAgeInSeconds(31536000); // 1년
 	}
 
-	private Customizer<HeadersConfigurer<HttpSecurity>.FrameOptionsConfig> frameOptionsCustomizer() {
-		return FrameOptionsConfig::deny;
-	}
-
 	private Customizer<HeadersConfigurer<HttpSecurity>.XXssConfig> xssCustomizer() {
-		return xss -> xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED);
+		return xss -> xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK);
 	}
 
 }
