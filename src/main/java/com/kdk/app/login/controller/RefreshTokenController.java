@@ -4,7 +4,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,8 +44,8 @@ public class RefreshTokenController {
 	}
 
 	@Operation(summary = "로그인")
-	@GetMapping(value = "refresh-token", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<LoginResVo> refreshToken(@Valid RefreshTokenParamVo refreshTokenParamVo, BindingResult bindingResult,
+	@PostMapping(value = "refresh-token", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<LoginResVo> refreshToken(@Valid @RequestBody RefreshTokenParamVo refreshTokenParamVo, BindingResult bindingResult,
 			HttpServletResponse response) {
 		LoginResVo loginResVo = new LoginResVo();
 
