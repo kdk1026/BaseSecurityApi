@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +17,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.kdk.app.common.ExceptionMessage;
 
  /**
  * <pre>
@@ -33,22 +33,25 @@ import com.kdk.app.common.ExceptionMessage;
  */
 public class JacksonUtil {
 
+	private static final Logger logger = LoggerFactory.getLogger(JacksonUtil.class);
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
 	private JacksonUtil() {
 		super();
 	}
 
-	private static JacksonUtil instance;
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+	private static class ExceptionMessage {
 
-	private static final Logger logger = LoggerFactory.getLogger(JacksonUtil.class);
+		public static String isNull(String paramName) {
+	        return String.format("'%s' is null", paramName);
+	    }
 
-	private static synchronized JacksonUtil getInstance() {
-        if (instance == null) {
-			instance = new JacksonUtil();
-        }
+		public static String isNullOrEmpty(String paramName) {
+	        return String.format("'%s' is null or empty", paramName);
+	    }
 
-        return instance;
-    }
+	}
 
 	public static class ToJson {
 		private ToJson() {
@@ -61,7 +64,6 @@ public class JacksonUtil {
 			String jsonStr = "";
 
 			try {
-				getInstance();
 				if (!isPretty) {
 					jsonStr = MAPPER.writeValueAsString(obj);
 				} else {
@@ -81,7 +83,6 @@ public class JacksonUtil {
 			String jsonStr = "";
 
 			try {
-				getInstance();
 				if (!isPretty) {
 					jsonStr = MAPPER.writeValueAsString(map);
 				} else {
@@ -101,7 +102,6 @@ public class JacksonUtil {
 			String jsonStr = "";
 
 			try {
-				getInstance();
 				if (!isPretty) {
 					jsonStr = MAPPER.writeValueAsString(list);
 				} else {
@@ -118,7 +118,6 @@ public class JacksonUtil {
 				throw new IllegalArgumentException(ExceptionMessage.isNullOrEmpty("map"));
 			}
 
-			getInstance();
 			return MAPPER.valueToTree(map);
 		}
 
@@ -127,7 +126,6 @@ public class JacksonUtil {
 				throw new IllegalArgumentException(ExceptionMessage.isNullOrEmpty("list"));
 			}
 
-			getInstance();
 			return MAPPER.valueToTree(list);
 		}
 	}
@@ -138,16 +136,14 @@ public class JacksonUtil {
 		}
 
 		private static void validateJsonString(String jsonStr) {
-			Objects.requireNonNull(jsonStr, ExceptionMessage.isNull("jsonStr"));
-			if (jsonStr.trim().isEmpty()) {
-				throw new IllegalArgumentException(ExceptionMessage.isNull("jsonStr"));
+			if ( StringUtils.isBlank(jsonStr) ) {
+				throw new IllegalArgumentException(ExceptionMessage.isNullOrEmpty("jsonStr"));
 			}
 		}
 
 		private static void validateJsonArrayString(String jsonArrayStr) {
-			Objects.requireNonNull(jsonArrayStr, ExceptionMessage.isNull("jsonArrayStr"));
-			if (jsonArrayStr.trim().isEmpty()) {
-				throw new IllegalArgumentException(ExceptionMessage.isNull("jsonArrayStr"));
+			if ( StringUtils.isBlank(jsonArrayStr) ) {
+				throw new IllegalArgumentException(ExceptionMessage.isNullOrEmpty("jsonArrayStr"));
 			}
 		}
 
@@ -158,7 +154,6 @@ public class JacksonUtil {
 			Map<String, Object> map = new HashMap<>();
 
 			try {
-				getInstance();
 				map = MAPPER.readValue(jsonStr, Map.class);
 			} catch (IOException e) {
 				logger.error("", e);
@@ -172,7 +167,6 @@ public class JacksonUtil {
 			JsonNode jsonNode = null;
 
 			try {
-				getInstance();
 				jsonNode = MAPPER.readTree(jsonStr);
 			} catch (IOException e) {
 				logger.error("", e);
@@ -187,7 +181,6 @@ public class JacksonUtil {
 			List<T> list = new ArrayList<>();
 
 			try {
-				getInstance();
 				list = MAPPER.readValue(jsonArrStr, List.class);
 			} catch (IOException e) {
 				logger.error("", e);
@@ -201,7 +194,6 @@ public class JacksonUtil {
 			ArrayNode arrayNode = null;
 
 			try {
-				getInstance();
 				arrayNode = (ArrayNode) MAPPER.readTree(jsonArrStr);
 			} catch (IOException e) {
 				logger.error("", e);
@@ -215,7 +207,6 @@ public class JacksonUtil {
 			Objects.requireNonNull(clazz, ExceptionMessage.isNull("clazz"));
 
 			try {
-				getInstance();
 				Object result = MAPPER.readValue(jsonStr, clazz);
 				return clazz.cast(result);
 			} catch (IOException e) {
@@ -231,9 +222,8 @@ public class JacksonUtil {
 		}
 
 		private static void validateFileName(String fileName) {
-			Objects.requireNonNull(fileName, ExceptionMessage.isNull("fileName"));
-			if (fileName.trim().isEmpty()) {
-				throw new IllegalArgumentException(ExceptionMessage.isNull("fileName"));
+			if ( StringUtils.isBlank(fileName) ) {
+				throw new IllegalArgumentException(ExceptionMessage.isNullOrEmpty("fileName"));
 			}
 		}
 
@@ -245,7 +235,6 @@ public class JacksonUtil {
 		    Object obj = null;
 
 		    try {
-		    	getInstance();
 		        obj = MAPPER.readValue(new File(sfileName), typeReference);
 		    } catch (IOException e) {
 		        logger.error("Error reading JSON file", e);
@@ -262,7 +251,6 @@ public class JacksonUtil {
 		    List<T> obj = null;
 
 		    try {
-		    	getInstance();
 		        obj = MAPPER.readValue(new File(sfileName), typeReference);
 		    } catch (IOException e) {
 		        logger.error("Error reading JSON file", e);

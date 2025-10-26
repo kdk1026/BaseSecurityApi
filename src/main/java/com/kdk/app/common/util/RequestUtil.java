@@ -22,13 +22,21 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public class RequestUtil {
 
+	private static final Logger logger = LoggerFactory.getLogger(RequestUtil.class);
+
 	private RequestUtil() {
 		super();
 	}
 
-	private static final Logger logger = LoggerFactory.getLogger(RequestUtil.class);
+	private static class ExceptionMessage {
 
-	private static final String REQUEST_IS_NULL = "request cannot be null";
+		public static String isNull(String paramName) {
+	        return String.format("'%s' is null", paramName);
+	    }
+
+	}
+
+	private static final String REQUEST_IS_NULL = ExceptionMessage.isNull("request");
 
 	/**
 	 * IP 주소 가져오기
@@ -68,9 +76,18 @@ public class RequestUtil {
 	public static String getRequestDomain(HttpServletRequest request) {
 		Objects.requireNonNull(request, REQUEST_IS_NULL);
 
-		String sReqUrl = request.getRequestURL().toString();
-		String sServletPath = request.getServletPath();
-		return sReqUrl.replace(sServletPath, "");
+	    String scheme = request.getScheme();
+	    String domain = request.getServerName();
+	    int port = request.getServerPort();
+	    String contextPath = request.getContextPath();
+
+	    boolean isDefaultPort = (scheme.equals("http") && port == 80) || (scheme.equals("https") && port == 443);
+
+	    String baseUrl = isDefaultPort
+	        ? scheme + "://" + domain
+	        : scheme + "://" + domain + ":" + port;
+
+	    return baseUrl + contextPath;
 	}
 
 	/**

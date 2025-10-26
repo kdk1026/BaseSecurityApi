@@ -41,7 +41,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kdk.app.common.ExceptionMessage;
 
 /**
  * <pre>
@@ -69,6 +68,17 @@ public class RestTemplateUtil {
 
 	private RestTemplateUtil() {
 		super();
+	}
+
+	private static class ExceptionMessage {
+
+		private ExceptionMessage() {
+		}
+
+		public static String isNull(String paramName) {
+	        return String.format("'%s' is null", paramName);
+	    }
+
 	}
 
 	private static class RestTemplateProvider {

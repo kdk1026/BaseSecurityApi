@@ -9,28 +9,39 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import com.kdk.app.common.ExceptionMessage;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 /**
  * <pre>
- * -----------------------------------
  * 개정이력
  * -----------------------------------
- * 2024. 6. 7. kdk	최초작성
+ * 2021. 7. 30. 김대광	최초작성
+ * 2021. 8. 19. 김대광	SonarLint 지시에 따른 수정
+ * 2025. 5. 18. 김대광	AI가 추천한 Singleton 패턴으로 변경
  * 2025. 5. 27. 김대광	유틸은 Singleton 패턴을 사용하지 않는 것이 좋다는 의견 반영, static Class로 구분
  * </pre>
  *
  * @see <a href="https://offbyone.tistory.com/144">Ref</a>
- * @author kdk
+ * @see <a href="https://github.com/kdk1026/BaseApi/blob/master/src/main/java/com/kdk/app/common/util/spring/ContextUtil.java">Boot 3.x 참고</a>
+ * @author 김대광
  */
 public class ContextUtil {
 
 	private ContextUtil() {
 		super();
+	}
+
+	private static class ExceptionMessage {
+
+		private ExceptionMessage() {
+		}
+
+		public static String isNull(String paramName) {
+	        return String.format("'%s' is null", paramName);
+	    }
+
 	}
 
 	/**
@@ -80,7 +91,7 @@ public class ContextUtil {
 				throw new IllegalArgumentException(ExceptionMessage.isNull("key"));
 			}
 
-			RequestAttributes attr = RequestContextHolder.currentRequestAttributes();
+			ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
 			return attr.getAttribute(key, RequestAttributes.SCOPE_REQUEST);
 		}
 
@@ -96,7 +107,7 @@ public class ContextUtil {
 
 			Objects.requireNonNull(obj, ExceptionMessage.isNull("obj"));
 
-			RequestAttributes attr = RequestContextHolder.currentRequestAttributes();
+			ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
 			attr.setAttribute(key, obj, RequestAttributes.SCOPE_REQUEST);
 		}
 
@@ -109,7 +120,7 @@ public class ContextUtil {
 				throw new IllegalArgumentException(ExceptionMessage.isNull("key"));
 			}
 
-			RequestAttributes attr = RequestContextHolder.currentRequestAttributes();
+			ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
 			attr.removeAttribute(key, RequestAttributes.SCOPE_REQUEST);
 		}
 	}
@@ -138,7 +149,7 @@ public class ContextUtil {
 				throw new IllegalArgumentException(ExceptionMessage.isNull("key"));
 			}
 
-			RequestAttributes attr = RequestContextHolder.currentRequestAttributes();
+			ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
 			return attr.getAttribute(key, RequestAttributes.SCOPE_SESSION);
 		}
 
@@ -154,7 +165,7 @@ public class ContextUtil {
 
 			Objects.requireNonNull(obj, ExceptionMessage.isNull("obj"));
 
-			RequestAttributes attr = RequestContextHolder.currentRequestAttributes();
+			ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
 			attr.setAttribute(key, obj, RequestAttributes.SCOPE_SESSION);
 		}
 
@@ -167,7 +178,7 @@ public class ContextUtil {
 				throw new IllegalArgumentException(ExceptionMessage.isNull("key"));
 			}
 
-			RequestAttributes attr = RequestContextHolder.currentRequestAttributes();
+			ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
 			attr.removeAttribute(key, RequestAttributes.SCOPE_SESSION);
 		}
 	}

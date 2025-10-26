@@ -84,7 +84,7 @@ public class JwtTokenProvider {
 
 		String sKey = springBootProperty.getProperty(CRYPTO_AES_KEY);
 
-		EncryptResult encryptResult = BouncyCastleAesUtil.encrypt(BouncyCastleAesUtil.Algorithm.AES_CBC_PKCS5PADDING, sKey, sUserJson);
+		EncryptResult encryptResult = BouncyCastleAesUtil.encrypt(BouncyCastleAesUtil.Algorithm.AES_CBC_PKCS5PADDING, sKey, null, sUserJson);
 		String sEncryptUserJson = encryptResult.getEncryptedText();
 
 		builder.claim(CommonConstants.Jwt.USER_INFO, sEncryptUserJson);
@@ -125,7 +125,7 @@ public class JwtTokenProvider {
 
 		String sKey = springBootProperty.getProperty(CRYPTO_AES_KEY);
 
-		EncryptResult encryptResult = BouncyCastleAesUtil.encrypt(BouncyCastleAesUtil.Algorithm.AES_CBC_PKCS5PADDING, sKey, sUserJson);
+		EncryptResult encryptResult = BouncyCastleAesUtil.encrypt(BouncyCastleAesUtil.Algorithm.AES_CBC_PKCS5PADDING, sKey, null, sUserJson);
 		String sEncryptUserJson = encryptResult.getEncryptedText();
 
 		builder.claim(CommonConstants.Jwt.USER_INFO, sEncryptUserJson);
@@ -272,7 +272,7 @@ public class JwtTokenProvider {
 			String sEncryptUserJson = String.valueOf(claims.get(CommonConstants.Jwt.USER_INFO));
 
 			String sIv = String.valueOf(claims.get("iv"));
-			String sUserJson = BouncyCastleAesUtil.decrypt(BouncyCastleAesUtil.Algorithm.AES_CBC_PKCS5PADDING, sKey, sIv, sEncryptUserJson);
+			String sUserJson = BouncyCastleAesUtil.decrypt(BouncyCastleAesUtil.Algorithm.AES_CBC_PKCS5PADDING, sKey, sIv, true, sEncryptUserJson);
 
 			Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 			user = gson.fromJson(sUserJson, UserVo.class);

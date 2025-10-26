@@ -6,29 +6,27 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import com.kdk.app.common.ExceptionMessage;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
-/**
- * <pre>
- * -----------------------------------
- * 개정이력
- * -----------------------------------
- * 2024. 6. 8. 김대광	최초작성
- * </pre>
- *
- *
- * @author 김대광
- */
 public class SpringSessionUtil {
+
+	public static final String LOGIN_SESSION_ID = "__userInfo__";
 
 	private SpringSessionUtil() {
 		super();
 	}
 
-	public static final String LOGIN_SESSION_ID = "__userInfo__";
+	private static class ExceptionMessage {
+
+		private ExceptionMessage() {
+		}
+
+		public static String isNull(String paramName) {
+	        return String.format("'%s' is null", paramName);
+	    }
+
+	}
 
 	/**
 	 * 로그인 정보를 세션에 저장

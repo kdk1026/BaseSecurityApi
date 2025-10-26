@@ -28,8 +28,16 @@ public class FileMimeTypeUtil {
 		super();
 	}
 
+	private static class ExceptionMessage {
+
+		public static String isNull(String paramName) {
+	        return String.format("'%s' is null", paramName);
+	    }
+
+	}
+
 	public static String getFileMimeTypeTika(InputStream is) {
-		Objects.requireNonNull(is, "InputStream must not be null");
+		Objects.requireNonNull(is, ExceptionMessage.isNull("is"));
 
 		String mimeType = "";
 		Tika tika = new Tika();
