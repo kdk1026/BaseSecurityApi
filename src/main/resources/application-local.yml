@@ -33,10 +33,10 @@ jwt:
    issuer: base
    access:
       expire:
-         minute: 60
+         minute: 30
    refresh:
       expire:
-         minute: 10080   ### 60 * 24 * 7
+         minute: 1440   ### 60 * 24
    token:
       type: Bearer
    header: Authorization

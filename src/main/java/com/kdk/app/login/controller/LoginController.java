@@ -1,5 +1,6 @@
 package com.kdk.app.login.controller;
 
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -10,9 +11,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kdk.app.common.CommonConstants;
 import com.kdk.app.common.component.SpringBootProperty;
 import com.kdk.app.common.jwt.JwtTokenProvider;
 import com.kdk.app.common.jwt.JwtTokenVo;
+import com.kdk.app.common.util.CookieUtil;
 import com.kdk.app.common.vo.ResponseCodeEnum;
 import com.kdk.app.login.service.LoginService;
 import com.kdk.app.login.vo.LoginParamVo;
@@ -42,10 +45,12 @@ public class LoginController {
 
 	private final LoginService loginService;
 	private final SpringBootProperty springBootProperty;
+	private final Environment env;
 
-	public LoginController(LoginService loginService, SpringBootProperty springBootProperty) {
+	public LoginController(LoginService loginService, SpringBootProperty springBootProperty, Environment env) {
 		this.loginService = loginService;
 		this.springBootProperty = springBootProperty;
+		this.env = env;
 	}
 
 	@Operation(summary = "로그인")
@@ -89,11 +94,12 @@ public class LoginController {
 
 		jwtTokenVo = jwtTokenProvider.generateRefreshToken(userVo);
 		String sRefreshToken = jwtTokenVo.getRefreshToken();
-		loginResVo.setRefreshToken(sRefreshToken);
 
 		String sRefreshTokenExpireMin = springBootProperty.getProperty("jwt.refresh.expire.minute");
 		int nRefreshTokenExpireMin = Integer.parseInt(sRefreshTokenExpireMin);
-		loginResVo.setRefreshTokenExpireSecond(nRefreshTokenExpireMin * 60);
+
+		String sProfile = env.getActiveProfiles()[0];
+		CookieUtil.addCookie(response, CommonConstants.Jwt.REFRESH_TOKEN, sRefreshToken, nRefreshTokenExpireMin * 60, null, sProfile);
 
 		String sTokenType = springBootProperty.getProperty("jwt.token.type");
 		if ( sTokenType.lastIndexOf(" ") == -1 ) {
