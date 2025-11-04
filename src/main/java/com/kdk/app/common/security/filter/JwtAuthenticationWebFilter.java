@@ -97,7 +97,7 @@ public class JwtAuthenticationWebFilter extends OncePerRequestFilter {
 
 					SecurityContextHolder.getContext().setAuthentication(authentication);
 
-					response.addHeader(CommonConstants.Jwt.ACCESS_TOKEN, sAccessToken);
+					response.setHeader(CommonConstants.Jwt.ACCESS_TOKEN, sAccessToken);
 
 					filterChain.doFilter(request, response);
 					break;
