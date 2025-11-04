@@ -2,6 +2,7 @@ package com.kdk.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -19,7 +20,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.kdk.app.common.component.SpringBootProperty;
-import com.kdk.app.common.security.filter.JwtAuthenticationFilter;
+import com.kdk.app.common.security.filter.JwtAuthenticationWebFilter;
 import com.kdk.app.common.security.service.UserDetailsServiceImpl;
 
 /**
@@ -40,10 +41,12 @@ public class SecurityConfig {
 
 	private final UserDetailsServiceImpl userDetailsServiceImpl;
 	private final SpringBootProperty springBootProperty;
+	private final Environment env;
 
-	public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl, SpringBootProperty springBootProperty) {
+	public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl, SpringBootProperty springBootProperty, Environment env) {
 		this.userDetailsServiceImpl = userDetailsServiceImpl;
 		this.springBootProperty = springBootProperty;
+		this.env = env;
 	}
 
 	@Bean
@@ -54,7 +57,7 @@ public class SecurityConfig {
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		JwtAuthenticationFilter jwtAuthFilter = new JwtAuthenticationFilter(userDetailsServiceImpl, springBootProperty);
+		JwtAuthenticationWebFilter jwtAuthFilter = new JwtAuthenticationWebFilter(userDetailsServiceImpl, springBootProperty, env);
 
 		http
 			.authorizeHttpRequests(authorizeHttpRequests ->

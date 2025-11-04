@@ -251,6 +251,27 @@ public class JwtTokenProvider {
 		return (String) claims.get(CommonConstants.Jwt.TOKEN_KIND);
 	}
 
+	/**
+	 * 갱신된 Access 토큰 가져오기
+	 *
+	 * <pre>
+	 * - 인터셉터 예외 대상에서 사용자 정보 필요 시 사용
+	 *
+	 * - 인터셉터 대상은 만료 여부를 알려면 토큰 검증을 해야 하므로 다음으로 사용
+	 *   request.getAttribute(CommonConstants.Jwt.USER_INFO) 로 사용
+	 * </pre>
+	 * @param refreshToken
+	 * @param profile
+	 * @return
+	 */
+	public String getRenewedAccessToken(String refreshToken, String profile) {
+		UserVo userVo = this.getAuthUserFromJwt(refreshToken);
+
+		JwtTokenVo jwtTokenVo = this.generateAccessToken(userVo);
+
+		return jwtTokenVo.getAccessToken();
+	}
+
 // ------------------------------------------------------------------------
 // 토큰에서 로그인 정보 추출
 // ------------------------------------------------------------------------

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,9 +12,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.kdk.app.common.CommonConstants;
 import com.kdk.app.common.component.SpringBootProperty;
 import com.kdk.app.common.jwt.JwtTokenProvider;
 import com.kdk.app.common.security.service.UserDetailsServiceImpl;
+import com.kdk.app.common.util.CookieUtil;
 import com.kdk.app.common.util.json.JacksonUtil;
 import com.kdk.app.common.vo.CommonResVo;
 import com.kdk.app.common.vo.ResponseCodeEnum;
@@ -32,18 +35,19 @@ import jakarta.servlet.http.HttpServletResponse;
  * 2025. 1. 28. kdk	최초작성
  * </pre>
  *
- * 쿠키 사용 못하는 네이티브 앱과 협업 시
  *
  * @author kdk
  */
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+public class JwtAuthenticationWebFilter extends OncePerRequestFilter {
 
 	private final UserDetailsServiceImpl userDetailsServiceImpl;
 	private final SpringBootProperty springBootProperty;
+	private final Environment env;
 
-	public JwtAuthenticationFilter(UserDetailsServiceImpl userDetailsServiceImpl, SpringBootProperty springBootProperty) {
+	public JwtAuthenticationWebFilter(UserDetailsServiceImpl userDetailsServiceImpl, SpringBootProperty springBootProperty, Environment env) {
 		this.userDetailsServiceImpl = userDetailsServiceImpl;
 		this.springBootProperty = springBootProperty;
+		this.env = env;
 	}
 
 	@Override
@@ -57,22 +61,42 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		String sToken = jwtTokenProvider.getTokenFromReqHeader(request);
 
 		if ( StringUtils.isBlank(sToken) ) {
-			commonResVo.setCode(ResponseCodeEnum.ACCESS_TOEKN_INVALID.getCode());
-			commonResVo.setMessage(ResponseCodeEnum.ACCESS_TOEKN_INVALID.getMessage());
+			commonResVo.setCode(ResponseCodeEnum.ACCESS_DENIED.getCode());
+			commonResVo.setMessage(ResponseCodeEnum.ACCESS_DENIED.getMessage());
 		} else {
-			// 2. 토큰 유효성 검증
-			switch ( jwtTokenProvider.isValidateJwtToken(sToken) ) {
-			case 0:
-				commonResVo.setCode(ResponseCodeEnum.ACCESS_TOEKN_INVALID.getCode());
-				commonResVo.setMessage(ResponseCodeEnum.ACCESS_TOEKN_INVALID.getMessage());
-				break;
-			case 2:
-				commonResVo.setCode(ResponseCodeEnum.ACCESS_TOKEN_EXPIRED.getCode());
-				commonResVo.setMessage(ResponseCodeEnum.ACCESS_TOKEN_EXPIRED.getMessage());
-				break;
+			String sRefreshToken = CookieUtil.getCookieValue(request, CommonConstants.Jwt.REFRESH_TOKEN);
 
-			default:
-				break;
+			if ( StringUtils.isBlank(sRefreshToken) ) {
+				commonResVo.setCode(ResponseCodeEnum.ACCESS_DENIED.getCode());
+				commonResVo.setMessage(ResponseCodeEnum.ACCESS_DENIED.getMessage());
+			} else {
+				// 2. 토큰 유효성 검증
+				switch ( jwtTokenProvider.isValidateJwtToken(sToken) ) {
+				case 0:
+					commonResVo.setCode(ResponseCodeEnum.ACCESS_TOEKN_INVALID.getCode());
+					commonResVo.setMessage(ResponseCodeEnum.ACCESS_TOEKN_INVALID.getMessage());
+					break;
+				case 2:
+					String sProfile = env.getActiveProfiles()[0];
+					String sAccessToken = jwtTokenProvider.getRenewedAccessToken(sRefreshToken, sProfile);
+
+					UserVo userVo = jwtTokenProvider.getAuthUserFromJwt(sAccessToken);
+
+					UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(userVo.getUsername());
+
+					UsernamePasswordAuthenticationToken authentication
+						= new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+					authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+					SecurityContextHolder.getContext().setAuthentication(authentication);
+
+					filterChain.doFilter(request, response);
+					break;
+
+				default:
+					break;
+				}
 			}
 
 			if ( !StringUtils.isBlank(commonResVo.getCode()) ) {
