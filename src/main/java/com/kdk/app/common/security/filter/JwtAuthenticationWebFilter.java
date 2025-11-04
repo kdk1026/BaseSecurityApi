@@ -26,6 +26,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * <pre>
@@ -38,6 +39,7 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * @author kdk
  */
+@Slf4j
 public class JwtAuthenticationWebFilter extends OncePerRequestFilter {
 
 	private final UserDetailsServiceImpl userDetailsServiceImpl;
@@ -73,10 +75,14 @@ public class JwtAuthenticationWebFilter extends OncePerRequestFilter {
 				// 2. 토큰 유효성 검증
 				switch ( jwtTokenProvider.isValidateJwtToken(sToken) ) {
 				case 0:
+					log.error("AccessToken Invalid");
+
 					commonResVo.setCode(ResponseCodeEnum.ACCESS_TOEKN_INVALID.getCode());
 					commonResVo.setMessage(ResponseCodeEnum.ACCESS_TOEKN_INVALID.getMessage());
 					break;
 				case 2:
+					log.info("AccessToken Expired");
+
 					String sProfile = env.getActiveProfiles()[0];
 					String sAccessToken = jwtTokenProvider.getRenewedAccessToken(sRefreshToken, sProfile);
 
