@@ -73,12 +73,12 @@ public class DoubleEncryptionController {
 		StringBuilder sb = new StringBuilder();
 
 		sb.setLength(0);
-		sb.append(secretKeyPrefix).append(Base64.getEncoder().encodeToString(secretKey.getBytes())).append(secretKeySufix);
-		String primaryData = sb.toString();
+		sb.append(secretKeyPrefix).append(secretKey).append(secretKeySufix);
+		String primaryData = Base64.getEncoder().encodeToString(sb.toString().getBytes());
 
 		sb.setLength(0);
-		sb.append(ivPrefix).append(Base64.getEncoder().encodeToString(iv.getBytes())).append(ivSufix);
-		String secondaryData = sb.toString();
+		sb.append(ivPrefix).append(iv).append(ivSufix);
+		String secondaryData = Base64.getEncoder().encodeToString(sb.toString().getBytes());
 
 		AesKeyVo vo = new AesKeyVo();
 		vo.setPrimaryData(primaryData);
