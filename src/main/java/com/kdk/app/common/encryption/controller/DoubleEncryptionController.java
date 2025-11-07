@@ -42,7 +42,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  *
  * <pre>
  * FrontEnd 에 응답 시, 암호화
- * FrontEnd 에서 요청 시, 복호화
+ * FrontEnd 에서 수신 시, 복호화
  *  - 비밀번호는 당연히 복호화 후, 일방향(해시) 암호화
  *  - 그 외에는 DB 암호화 적용하여 DB 처리
  * </pre>
