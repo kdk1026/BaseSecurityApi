@@ -76,9 +76,9 @@ public class DoubleEncryptionController {
 		String iv = springBootProperty.getProperty("crypto.aes.iv");
 
 		String secretKeyPrefix = RandomStringUtils.secure().nextAlphanumeric(18);
-		String ivPrefix = RandomStringUtils.secure().nextAlphanumeric(34);
-
 		String secretKeySufix = RandomStringUtils.secure().nextAlphanumeric(14);
+
+		String ivPrefix = RandomStringUtils.secure().nextAlphanumeric(34);
 		String ivSufix = RandomStringUtils.secure().nextAlphanumeric(14);
 
 		StringBuilder sb = new StringBuilder();
