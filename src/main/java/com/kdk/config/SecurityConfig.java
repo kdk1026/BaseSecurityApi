@@ -65,6 +65,7 @@ public class SecurityConfig {
 					.requestMatchers("/admin/**").hasRole("ADMIN")
 					.requestMatchers("/manager/**").hasAnyRole("ADMIN", "MANAGER")
 					.requestMatchers("/upload/**").permitAll()
+					.requestMatchers("/capsule-config/**").permitAll()
 					.requestMatchers("/actuator/**").permitAll()
 					.requestMatchers("/test/**").permitAll()
 					.anyRequest().authenticated()
