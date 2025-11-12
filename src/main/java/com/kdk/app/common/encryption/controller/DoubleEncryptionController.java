@@ -26,8 +26,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * </pre>
  *
  * <pre>
- * secretKey = primaryData.substring(18, 50);
- * iv = secondaryData.substring(34, 50);
+ * secretKey = primaryData.substring(18, 34) + secretKeySuffix 16자리;
+ * iv = secondaryData.substring(34, 42) + ivSuffix 8자리;
  * </pre>
  *
  * <pre>
@@ -72,14 +72,14 @@ public class DoubleEncryptionController {
 	public ResponseEntity<AesKeyResVo> getAesEncryptionConfigData() {
 		AesKeyResVo resVo = new AesKeyResVo();
 
-		String secretKey = springBootProperty.getProperty("crypto.aes.key");
-		String iv = springBootProperty.getProperty("crypto.aes.iv");
+		String secretKey = springBootProperty.getProperty("crypto.aes.key").substring(0, 16);
+		String iv = springBootProperty.getProperty("crypto.aes.iv").substring(0, 8);
 
 		String secretKeyPrefix = RandomStringUtils.secure().nextAlphanumeric(18);
-		String secretKeySufix = RandomStringUtils.secure().nextAlphanumeric(14);
+		String secretKeySufix = RandomStringUtils.secure().nextAlphanumeric(30);
 
 		String ivPrefix = RandomStringUtils.secure().nextAlphanumeric(34);
-		String ivSufix = RandomStringUtils.secure().nextAlphanumeric(14);
+		String ivSufix = RandomStringUtils.secure().nextAlphanumeric(22);
 
 		StringBuilder sb = new StringBuilder();
 
