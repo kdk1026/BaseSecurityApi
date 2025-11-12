@@ -26,8 +26,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * </pre>
  *
  * <pre>
- * secretKey = primaryData.substring(18, 34) + secretKeySuffix 16자리;
- * iv = secondaryData.substring(34, 42) + ivSuffix 8자리;
+ * secretKey = primaryData.substring(18, 34) + secretKeyHalf 16자리;
+ * iv = secondaryData.substring(34, 42) + ivHalf 8자리;
  * </pre>
  *
  * <pre>
