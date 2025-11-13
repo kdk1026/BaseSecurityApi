@@ -1,5 +1,6 @@
 package com.kdk.app.common.interceptor;
 
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -24,14 +25,20 @@ import jakarta.servlet.http.HttpServletResponse;
 public class RequestAllowInterceptor implements HandlerInterceptor {
 
 	private final SpringBootProperty springBootProperty;
+	private final Environment env;
 
-	public RequestAllowInterceptor(SpringBootProperty springBootProperty) {
+	public RequestAllowInterceptor(SpringBootProperty springBootProperty, Environment env) {
 		this.springBootProperty = springBootProperty;
+		this.env = env;
 	}
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
+
+		if ( CommonConstants.Profile.LOCAL.equals(env.getActiveProfiles()[0]) ) {
+			return true;
+		}
 
 		String csrfToken = request.getHeader(CommonConstants.CsrfToken.CSRF_TOKEN_HEADER_KEY);
 		String csrfTokenInCookie = CookieUtil.getCookieValue(request, CommonConstants.CsrfToken.CSRF_TOKEN_COOKIE_KEY);
