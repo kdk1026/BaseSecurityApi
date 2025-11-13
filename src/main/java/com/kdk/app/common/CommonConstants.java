@@ -64,7 +64,7 @@ public class CommonConstants {
 
 		}
 
-		public static final String CSRF_TOKEN_COOKIE_KEY = "csrfToken";
+		public static final String CSRF_TOKEN_COOKIE_KEY = "XSRF-TOKEN";
 		public static final String CSRF_TOKEN_HEADER_KEY = "X-CSRF-TOKEN";
 	}
 
