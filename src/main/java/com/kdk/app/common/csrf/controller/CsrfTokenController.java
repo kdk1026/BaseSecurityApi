@@ -2,7 +2,6 @@ package com.kdk.app.common.csrf.controller;
 
 import java.util.UUID;
 
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,12 +33,6 @@ import jakarta.servlet.http.HttpServletResponse;
 @RequestMapping("/csrf-token")
 public class CsrfTokenController {
 
-	private final Environment env;
-
-	public CsrfTokenController(Environment env) {
-		this.env = env;
-	}
-
 	@Operation(summary = "CSRF 토큰 생성")
 	@GetMapping()
 	public ResponseEntity<CsrfTokenResVo> getCsrfToken(HttpServletResponse response) {
@@ -47,7 +40,8 @@ public class CsrfTokenController {
 
 		String csrfToken = UUID.randomUUID().toString();
 
-		CookieUtil.addSessionCookie(response, CommonConstants.CsrfToken.CSRF_TOKEN_COOKIE_KEY, csrfToken, null, env.getActiveProfiles()[0]);
+		// CSRF 토큰은 예외적으로 HttpOnly 가 아닌 쿠키로 생성
+		CookieUtil.addSessionCookie(response, CommonConstants.CsrfToken.CSRF_TOKEN_COOKIE_KEY, csrfToken, null, CommonConstants.Profile.LOCAL);
 		resVo.setCsrfToken(csrfToken);
 
 		resVo.setCode(ResponseCodeEnum.SUCCESS.getCode());
