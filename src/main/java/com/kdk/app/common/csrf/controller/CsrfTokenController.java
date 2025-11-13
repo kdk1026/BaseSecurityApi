@@ -2,6 +2,7 @@ package com.kdk.app.common.csrf.controller;
 
 import java.util.UUID;
 
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,11 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kdk.app.common.CommonConstants;
 import com.kdk.app.common.csrf.vo.CsrfTokenResVo;
-import com.kdk.app.common.util.CookieUtil;
 import com.kdk.app.common.vo.ResponseCodeEnum;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
@@ -33,6 +34,12 @@ import jakarta.servlet.http.HttpServletResponse;
 @RequestMapping("/csrf-token")
 public class CsrfTokenController {
 
+	private final Environment env;
+
+	public CsrfTokenController(Environment env) {
+		this.env = env;
+	}
+
 	@Operation(summary = "CSRF 토큰 생성")
 	@GetMapping()
 	public ResponseEntity<CsrfTokenResVo> getCsrfToken(HttpServletResponse response) {
@@ -41,12 +48,26 @@ public class CsrfTokenController {
 		String csrfToken = UUID.randomUUID().toString();
 
 		// CSRF 토큰은 예외적으로 HttpOnly 가 아닌 쿠키로 생성
-		CookieUtil.addSessionCookie(response, CommonConstants.CsrfToken.CSRF_TOKEN_COOKIE_KEY, csrfToken, null, CommonConstants.Profile.LOCAL);
+		this.addSessionCookie(response, CommonConstants.CsrfToken.CSRF_TOKEN_COOKIE_KEY, csrfToken, null, env.getActiveProfiles()[0]);
 		resVo.setCsrfToken(csrfToken);
 
 		resVo.setCode(ResponseCodeEnum.SUCCESS.getCode());
 		resVo.setMessage(ResponseCodeEnum.SUCCESS.getMessage());
 		return ResponseEntity.status(HttpStatus.OK).body(resVo);
+	}
+
+	private void addSessionCookie(HttpServletResponse response, String name, String value, String domain, String profile) {
+		Cookie cookie = new Cookie(name, value);
+		cookie.setPath("/");
+
+		if ( (domain != null) && (!domain.trim().isEmpty()) ) {
+			cookie.setDomain(domain);
+		}
+
+		cookie.setHttpOnly(false);
+		cookie.setSecure(!CommonConstants.Profile.LOCAL.equals(profile));
+
+		response.addCookie(cookie);
 	}
 
 }
