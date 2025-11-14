@@ -51,10 +51,10 @@ public class RequestAllowInterceptor implements HandlerInterceptor {
 		String[] allowFrontUrls = springBootProperty.getProperty("allow.front.urls").split(",");
 		List<String> allowFrontUrlList = Arrays.asList(allowFrontUrls);
 
-		boolean isAllow = false;
+		boolean isAllow = true;
 
-		if ( csrfToken.equals(csrfTokenInCookie) ) {
-			isAllow = true;
+		if ( csrfToken == null || csrfTokenInCookie == null || !csrfToken.equals(csrfTokenInCookie) ) {
+			isAllow = false;
 		}
 
 		if ( origin == null || !allowFrontUrlList.contains(origin) ) {
