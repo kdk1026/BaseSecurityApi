@@ -1,5 +1,8 @@
 package com.kdk.app.common.interceptor;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -44,9 +47,9 @@ public class RequestAllowInterceptor implements HandlerInterceptor {
 		String csrfTokenInCookie = CookieUtil.getCookieValue(request, CommonConstants.CsrfToken.CSRF_TOKEN_COOKIE_KEY);
 
 		String origin = request.getHeader("Origin");
-		String referer = request.getHeader("Referer");
 
-		String frontUrl = springBootProperty.getProperty("front.url");
+		String[] allowFrontUrls = springBootProperty.getProperty("allow.front.urls").split(",");
+		List<String> allowFrontUrlList = Arrays.asList(allowFrontUrls);
 
 		boolean isAllow = false;
 
@@ -54,11 +57,7 @@ public class RequestAllowInterceptor implements HandlerInterceptor {
 			isAllow = true;
 		}
 
-		if ( origin == null || !origin.equals(frontUrl) ) {
-			isAllow = false;
-		}
-
-		if ( referer == null || !referer.contains(frontUrl) ) {
+		if ( origin == null || !allowFrontUrlList.contains(origin) ) {
 			isAllow = false;
 		}
 
