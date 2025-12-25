@@ -24,7 +24,12 @@ server:
   error:
     whitelabel:
       enabled: false
-      
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
 swagger:
    title: Base Data API Docs
    description: Base Data API
