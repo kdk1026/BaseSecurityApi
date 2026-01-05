@@ -1,15 +1,10 @@
 package com.kdk.config;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -81,19 +76,30 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		return new MappingJackson2HttpMessageConverter(objectMapper);
 	}
 
+	// XXX jsonEscapeConverter 가 제대로 동작 안하는 경우 설정
+	/*
 	@Override
 	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-		converters.removeIf(MappingJackson2HttpMessageConverter.class::isInstance);
-        HttpMessageConverter<?> httpMessageConverter = this.jsonEscapeConverter();
-        converters.add(httpMessageConverter);
-	}
+		// JSON
+		boolean jsonReplaced = false;
 
-	@Override
-	public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
-		configurer
-			.ignoreAcceptHeader(true)
-			.defaultContentType(MediaType.APPLICATION_JSON);
+		for (int i = 0; i < converters.size(); i++) {
+			if (converters.get(i).getClass() == MappingJackson2HttpMessageConverter.class) {
+				converters.set(i, jsonEscapeConverter());
+				jsonReplaced = true;
+			}
+		}
+		if (!jsonReplaced) converters.add(0, jsonEscapeConverter());
+
+		// YAML
+		converters.add(new MappingJackson2YamlHttpMessageConverter());
+
+		// XML (라이브러리 필요)
+//		if (converters.stream().noneMatch(c -> c instanceof MappingJackson2XmlHttpMessageConverter)) {
+//	        converters.add(new MappingJackson2XmlHttpMessageConverter());
+//	    }
 	}
+	*/
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
