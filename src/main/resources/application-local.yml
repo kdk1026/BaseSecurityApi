@@ -39,9 +39,4 @@ jwt:
          minute: 1440   ### 60 * 24
    token:
       type: Bearer
-   header: Authorization
-   
-crypto:
-   aes:
-      key: HjbGhJYE216dzxynsnyDmRzpQ5ro90Ye
-      iv : ZSDkAhC4e3miuD5H
+   header: Authorization 
