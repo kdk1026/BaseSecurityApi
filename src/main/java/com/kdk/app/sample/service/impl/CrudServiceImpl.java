@@ -51,28 +51,43 @@ public class CrudServiceImpl implements CrudService {
 
 	@Override
 	public void registerPerson(PersonVo vo) {
+		int seq = 1;
+		if ( !personList.isEmpty() ) {
+			seq = personList.get(personList.size() -1).getSeq() + 1;
+		}
+		vo.setSeq(seq);
+
 		personList.add(vo);
 	}
 
 	@Override
-	public void modifyPerson(PersonVo vo) {
+	public PersonVo modifyPerson(PersonVo vo) {
+		PersonVo retVo = null;
+
 		for (PersonVo personVo : personList) {
 			if ( Objects.equals(personVo.getSeq(), vo.getSeq()) ) {
-				personList.remove(personVo);
-				personList.add(vo);
+				personList.set(personVo.getSeq(), vo);
+				retVo = personVo;
 				break;
 			}
 		}
+
+		return retVo;
 	}
 
 	@Override
-	public void removePerson(int seq) {
+	public PersonVo removePerson(int seq) {
+		PersonVo retVo = null;
+
 		for (PersonVo personVo : personList) {
 			if ( personVo.getSeq() == seq ) {
 				personList.remove(personVo);
+				retVo = personVo;
 				break;
 			}
 		}
+
+		return retVo;
 	}
 
 }

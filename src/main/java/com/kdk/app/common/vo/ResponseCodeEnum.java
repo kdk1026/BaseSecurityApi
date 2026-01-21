@@ -16,6 +16,7 @@ import java.text.MessageFormat;
 public enum ResponseCodeEnum {
 
 	SUCCESS("200", "성공"),
+	NOT_FOUND("200", "Not Found"),
 	LOGIN_INVALID("500", "아이디 또는 비밀번호를 확인해주세요."),
 	NO_INPUT("500", "{0} 은(는) 필수 항목입니다."),
 	SEARCH_FAIL("500", "조회중 오류가 발생했습니다."),

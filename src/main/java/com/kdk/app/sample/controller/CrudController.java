@@ -49,6 +49,10 @@ public class CrudController {
 	public ResponseEntity<PersonVo> person(@PathVariable int seq) {
 		PersonVo personVo = crudService.getPerson(seq);
 
+		if ( personVo == null ) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(personVo);
+		}
+
 		return ResponseEntity.status(HttpStatus.OK).body(personVo);
 	}
 
@@ -67,7 +71,13 @@ public class CrudController {
 	public ResponseEntity<CommonResVo> modifyPerson(@RequestBody PersonVo vo) {
 		CommonResVo resVo = new CommonResVo();
 
-		crudService.modifyPerson(vo);
+		PersonVo personVo = crudService.modifyPerson(vo);
+
+		if ( personVo == null ) {
+			resVo.setCode(ResponseCodeEnum.NOT_FOUND.getCode());
+			resVo.setMessage(ResponseCodeEnum.NOT_FOUND.getMessage());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resVo);
+		}
 
 		resVo.setCode(ResponseCodeEnum.SUCCESS.getCode());
 		resVo.setMessage(ResponseCodeEnum.SUCCESS.getMessage());
@@ -78,7 +88,13 @@ public class CrudController {
 	public ResponseEntity<CommonResVo> removePerson(@PathVariable int seq) {
 		CommonResVo resVo = new CommonResVo();
 
-		crudService.removePerson(seq);
+		PersonVo personVo = crudService.removePerson(seq);
+
+		if ( personVo == null ) {
+			resVo.setCode(ResponseCodeEnum.NOT_FOUND.getCode());
+			resVo.setMessage(ResponseCodeEnum.NOT_FOUND.getMessage());
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resVo);
+		}
 
 		resVo.setCode(ResponseCodeEnum.SUCCESS.getCode());
 		resVo.setMessage(ResponseCodeEnum.SUCCESS.getMessage());

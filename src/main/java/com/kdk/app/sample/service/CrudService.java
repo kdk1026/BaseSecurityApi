@@ -23,8 +23,8 @@ public interface CrudService {
 
 	public void registerPerson(PersonVo vo);
 
-	public void modifyPerson(PersonVo vo);
+	public PersonVo modifyPerson(PersonVo vo);
 
-	public void removePerson(int seq);
+	public PersonVo removePerson(int seq);
 
 }
