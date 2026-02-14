@@ -2,28 +2,25 @@ package com.kdk.app.common.util.spring;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
 
 import org.apache.hc.client5.http.config.ConnectionConfig;
-import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy;
+import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.io.HttpClientConnectionManager;
 import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.TlsSocketStrategy;
 import org.apache.hc.client5.http.ssl.TrustAllStrategy;
-import org.apache.hc.core5.ssl.SSLContextBuilder;
-import org.apache.hc.core5.util.TimeValue;
+import org.apache.hc.core5.ssl.SSLContexts;
+import org.apache.hc.core5.util.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ByteArrayResource;
@@ -58,7 +55,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *    > Jackson
  * </pre>
  *
- * isSSL은 false로 해서 오류 나는 겨우에만 true로 사용
+ * isVerify 의 경우, true로 해서 오류 나는 경우 false로
  *
  * @author 김대광
  */
@@ -81,113 +78,64 @@ public class RestTemplateUtil {
 
 	}
 
-	private static class RestTemplateProvider {
-		private static RestTemplate secureRestTemplate;
-		private static RestTemplate insecureRestTemplate;
+	private static final int TIMEOUT_MS = 5000;
 
-		public static synchronized RestTemplate getRestTemplate(boolean isSsl) {
-			if (isSsl) {
-				if (secureRestTemplate == null) {
-					HttpComponentsClientHttpRequestFactory factory = HttpRequestFactory.getRequestFactory(true);
-					if (factory != null) {
-						secureRestTemplate = new RestTemplate(factory);
-					} else {
-						secureRestTemplate = null;
-					}
-				}
-				return secureRestTemplate;
-			} else {
-				if (insecureRestTemplate == null) {
-					HttpComponentsClientHttpRequestFactory factory = HttpRequestFactory.getRequestFactory(false);
-					if (factory != null) {
-						insecureRestTemplate = new RestTemplate(factory);
-					} else {
-						insecureRestTemplate = null;
-					}
-				}
-				return insecureRestTemplate;
-			}
+	// 일반용 (isVerify = true)
+    private static final RestTemplate VERIFIED_TEMPLATE = new RestTemplate();
+
+    // SSL 무시용 (isVerify = false)
+    private static final RestTemplate UNVERIFIED_TEMPLATE = createUnverifiedTemplate();
+
+    public static RestTemplate getRestTemplate(boolean isVerify) {
+        return isVerify ? VERIFIED_TEMPLATE : UNVERIFIED_TEMPLATE;
+    }
+
+    private static RestTemplate createUnverifiedTemplate() {
+    	try {
+    		// 모든 인증서를 신뢰하는 SSLContext
+    		SSLContext sslContext = SSLContexts.custom()
+                    .loadTrustMaterial(TrustAllStrategy.INSTANCE)
+                    .build();
+
+    		// TlsStrategy 사용
+    		TlsSocketStrategy tlsStrategy = new DefaultClientTlsStrategy(
+                    sslContext,
+                    NoopHostnameVerifier.INSTANCE
+            );
+
+    		// 1. ConnectionConfig 설정
+    		ConnectionConfig connectionConfig = ConnectionConfig.custom()
+                    .setConnectTimeout(Timeout.ofMilliseconds(TIMEOUT_MS))
+                    .setSocketTimeout(Timeout.ofMilliseconds(TIMEOUT_MS))
+                    .build();
+
+    		// 2. ConnectionManager에 TLS 전략과 ConnectionConfig 주입
+            HttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+                    .setTlsSocketStrategy(tlsStrategy)
+                    .setDefaultConnectionConfig(connectionConfig)
+                    .setMaxConnTotal(100)
+                    .setMaxConnPerRoute(5)
+                    .build();
+
+            // 3. RequestConfig 설정 (ResponseTimeout 및 연결 요청 타임아웃)
+            RequestConfig requestConfig = RequestConfig.custom()
+                    .setResponseTimeout(Timeout.ofMilliseconds(TIMEOUT_MS))
+                    .setConnectionRequestTimeout(Timeout.ofMilliseconds(TIMEOUT_MS))
+                    .build();
+
+            CloseableHttpClient httpClient = HttpClients.custom()
+                    .setConnectionManager(connectionManager)
+                    .setDefaultRequestConfig(requestConfig)
+                    .build();
+
+            return new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpClient));
+
+		} catch (Exception e) {
+			logger.error("RestTemplate 생성 실패", e);
+			return new RestTemplate();
 		}
-	}
+    }
 
-	private static class Config {
-		private static final int TIMEOUT = 5000;
-
-		private static final ConnectionConfig CONNECTION_CONFIG =
-				ConnectionConfig.custom()
-				.setConnectTimeout(TIMEOUT, TimeUnit.MILLISECONDS)
-				.setSocketTimeout(TIMEOUT, TimeUnit.MILLISECONDS)
-				.build();
-	}
-
-	private static class HttpClientProvider {
-		private static CloseableHttpClient httpClient;
-
-        public static synchronized CloseableHttpClient getHttpClient(boolean isSsl) {
-        	if (httpClient == null) {
-        		try {
-					httpClient = HttpClients.custom()
-							.setConnectionManager(HttpClientConnectionManagerProvider.createHttpClientConnectionManager(isSsl))
-							.setRetryStrategy(new DefaultHttpRequestRetryStrategy(1, TimeValue.ofSeconds(3)))
-							.build();
-				} catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
-					logger.error("", e);
-				}
-        	}
-        	return httpClient;
-        }
-	}
-
-	private static class HttpClientConnectionManagerProvider {
-		private static HttpClientConnectionManager secureHttpClientConnectionManager;
-        private static HttpClientConnectionManager insecureHttpClientConnectionManager;
-
-        public static synchronized HttpClientConnectionManager createHttpClientConnectionManager(boolean isSsl) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
-        	if (isSsl) {
-        		if (secureHttpClientConnectionManager == null) {
-    				SSLContext sslContext = SSLContextBuilder.create()
-    						.loadTrustMaterial(TrustAllStrategy.INSTANCE)
-    						.build();
-
-    				DefaultClientTlsStrategy tlsStrategy = new DefaultClientTlsStrategy(
-    						sslContext, NoopHostnameVerifier.INSTANCE);
-
-    				secureHttpClientConnectionManager = PoolingHttpClientConnectionManagerBuilder.create()
-    						.setDefaultConnectionConfig(Config.CONNECTION_CONFIG)
-    						.setTlsSocketStrategy(tlsStrategy)
-    						.setMaxConnTotal(100)
-    						.setMaxConnPerRoute(5)
-    						.build();
-        		}
-        		return secureHttpClientConnectionManager;
-        	} else {
-        		if (insecureHttpClientConnectionManager == null) {
-        			insecureHttpClientConnectionManager = PoolingHttpClientConnectionManagerBuilder.create()
-        					.setDefaultConnectionConfig(Config.CONNECTION_CONFIG)
-        					.setMaxConnTotal(100)
-        					.setMaxConnPerRoute(5)
-        					.build();
-        		}
-        		return insecureHttpClientConnectionManager;
-        	}
-        }
-	}
-
-	private static class HttpRequestFactory {
-		private static HttpComponentsClientHttpRequestFactory getRequestFactory(boolean isSSL) {
-			CloseableHttpClient httpClient = HttpClientProvider.getHttpClient(isSSL);
-
-			if (httpClient != null) {
-				return new HttpComponentsClientHttpRequestFactory(httpClient);
-			} else {
-				return null;
-			}
-		}
-	}
-
-	private static RestTemplate getRestTemplate(boolean isSsl) {
-		return RestTemplateProvider.getRestTemplate(isSsl);
-	}
 
 	private static class Convert {
 		@SuppressWarnings("unchecked")
@@ -257,7 +205,7 @@ public class RestTemplateUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static ResponseEntity<Object> get(boolean isSSL, String url, MediaType mediaType
+	public static ResponseEntity<Object> get(boolean isVerify, String url, MediaType mediaType
 			, Map<String, Object> headerMap, Class<?> responseType, Object... uriVariables) {
 
 		if ( ObjectUtils.isEmpty(url.trim()) ) {
@@ -266,7 +214,7 @@ public class RestTemplateUtil {
 
 		Objects.requireNonNull(responseType, ExceptionMessage.isNull("responseType"));
 
-		RestTemplate restTemplate = RestTemplateUtil.getRestTemplate(isSSL);
+		RestTemplate restTemplate = RestTemplateUtil.getRestTemplate(isVerify);
 		if (restTemplate == null) {
 			return null;
 		}
@@ -287,15 +235,15 @@ public class RestTemplateUtil {
 		}
 	}
 
-	public static ResponseEntity<Object> post(boolean isSSL, String url, MediaType mediaType
+	public static ResponseEntity<Object> post(boolean isVerify, String url, MediaType mediaType
 			, Map<String, Object> headerMap, Object body, Class<?> responseType, Object... uriVariables) throws IOException {
 
 		Map<String, Object> bodyMap = Convert.objectToMap(body);
-		return post(isSSL, url, mediaType, headerMap, bodyMap, responseType, uriVariables);
+		return post(isVerify, url, mediaType, headerMap, bodyMap, responseType, uriVariables);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static ResponseEntity<Object> post(boolean isSSL, String url, MediaType mediaType
+	public static ResponseEntity<Object> post(boolean isVerify, String url, MediaType mediaType
 			, Map<String, Object> headerMap, Map<String, Object> bodyMap, Class<?> responseType, Object... uriVariables) throws IOException {
 
 		if ( ObjectUtils.isEmpty(url.trim()) ) {
@@ -304,7 +252,7 @@ public class RestTemplateUtil {
 
 		Objects.requireNonNull(responseType, ExceptionMessage.isNull("responseType"));
 
-		RestTemplate restTemplate = RestTemplateUtil.getRestTemplate(isSSL);
+		RestTemplate restTemplate = RestTemplateUtil.getRestTemplate(isVerify);
 		if (restTemplate == null) {
 			return null;
 		}
