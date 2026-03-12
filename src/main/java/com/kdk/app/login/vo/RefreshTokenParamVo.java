@@ -26,8 +26,9 @@ public class RefreshTokenParamVo {
 	@NotBlank(message = "접근 토큰은 필수 항목입니다.")
 	private String accessToken;
 
-	@Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "갱신 토큰")
-	@NotBlank(message = "갱신 토큰은 필수 항목입니다.")
-	private String refreshToken;
+	// XXX FrontEnd Web이 아닌 Native App 일 경우, 파라미터로 받아서 처리
+//	@Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "갱신 토큰")
+//	@NotBlank(message = "갱신 토큰은 필수 항목입니다.")
+//	private String refreshToken;
 
 }

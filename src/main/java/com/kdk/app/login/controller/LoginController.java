@@ -16,6 +16,7 @@ import com.kdk.app.common.component.SpringBootProperty;
 import com.kdk.app.common.jwt.JwtTokenProvider;
 import com.kdk.app.common.jwt.JwtTokenVo;
 import com.kdk.app.common.util.CookieUtil;
+import com.kdk.app.common.util.CookieUtil.CookieConfig;
 import com.kdk.app.common.vo.ResponseCodeEnum;
 import com.kdk.app.login.service.LoginService;
 import com.kdk.app.login.vo.LoginParamVo;
@@ -99,7 +100,15 @@ public class LoginController {
 		int nRefreshTokenExpireMin = Integer.parseInt(sRefreshTokenExpireMin);
 
 		String sProfile = env.getActiveProfiles()[0];
-		CookieUtil.addCookie(response, CommonConstants.Jwt.REFRESH_TOKEN, sRefreshToken, nRefreshTokenExpireMin * 60, null, sProfile);
+		CookieConfig cookieConfig = CookieConfig.builder()
+				.name(CommonConstants.Jwt.REFRESH_TOKEN)
+				.value(sRefreshToken)
+				.expiry(nRefreshTokenExpireMin * 60)
+				.domain(null)
+				.profile(sProfile)
+				.build();
+
+		CookieUtil.addCookie(response, cookieConfig);
 
 		String sTokenType = springBootProperty.getProperty("jwt.token.type");
 		if ( sTokenType.lastIndexOf(" ") == -1 ) {

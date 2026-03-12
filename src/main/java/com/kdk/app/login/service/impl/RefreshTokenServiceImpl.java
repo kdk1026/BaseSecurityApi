@@ -9,13 +9,16 @@ import com.kdk.app.common.CommonConstants;
 import com.kdk.app.common.component.SpringBootProperty;
 import com.kdk.app.common.jwt.JwtTokenProvider;
 import com.kdk.app.common.jwt.JwtTokenVo;
+import com.kdk.app.common.util.CookieUtil;
 import com.kdk.app.common.util.date.Jsr310DateUtil;
+import com.kdk.app.common.util.spring.ContextUtil;
 import com.kdk.app.common.vo.ResponseCodeEnum;
 import com.kdk.app.login.service.RefreshTokenService;
 import com.kdk.app.login.vo.LoginResVo;
 import com.kdk.app.login.vo.RefreshTokenParamVo;
 import com.kdk.app.login.vo.UserVo;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -60,8 +63,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 		// ------------------------------------------------------------------------
 		// 갱신 토큰 유효성 검증
 		// ------------------------------------------------------------------------
-		// XXX 쿠키에 구워져 있는 경우, 쿠키에서 꺼내온다.
-		String sRefreshToken = refreshTokenParamVo.getRefreshToken();
+		HttpServletRequest request = ContextUtil.Request.getRequest();
+		String sRefreshToken = CookieUtil.getCookieValue(request, CommonConstants.Jwt.REFRESH_TOKEN);
 
 		loginResVo = this.validToken(sRefreshToken, jwtTokenProvider, 2);
 
